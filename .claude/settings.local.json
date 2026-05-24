@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Bash(curl -sL \"https://api.github.com/repos/agentkernel/openclaw-desktop/releases/latest\")",
+      "Bash(curl -v \"https://api.github.com/repos/agentkernel/openclaw-desktop/releases/latest\")",
+      "WebFetch(domain:segmentfault.com)",
+      "WebFetch(domain:blog.csdn.net)",
+      "Bash(gh release *)",
+      "WebFetch(domain:www.chinaz.com)",
+      "Bash(curl -sL \"https://registry.npmjs.org/openclaw/latest\")",
+      "Bash(curl -sL -o /dev/null -w \"%{http_code}\" \"https://ghproxy.net/https://github.com/agentkernel/openclaw-desktop/releases/download/v0.7.0%2Bopenclaw.2026.4.2/OpenClaw-Setup-0.7.0%2Bopenclaw.2026.4.2.exe\")",
+      "Bash(npm install *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://api.next.bspapp.com\" --connect-timeout 5)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://api.bspapp.com\" --connect-timeout 5)",
+      "Bash(bash --version)",
+      "Bash(jq --version)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); dir=$(echo \"$input\" | sed -n 's/.*\"current_dir\":\"\\([^\"]*\\)\".*/\\1/p'); short_dir=$(echo \"$dir\" | awk -F'/' '{if(NF>=3) printf \"%s/%s\", $(NF-1), $NF; else if(NF>1) print $NF; else print $0}'); model=$(echo \"$input\" | sed -n 's/.*\"display_name\":\"\\([^\"]*\\)\".*/\\1/p'); remaining=$(echo \"$input\" | sed -n 's/.*\"remaining_percentage\":\\([0-9]*\\).*/\\1/p'); if [ -n \"$remaining\" ]; then printf '%s | %s | Context: %s%%' \"$short_dir\" \"$model\" \"$remaining\"; else echo \"$short_dir | $model\"; fi"
+  }
+}
