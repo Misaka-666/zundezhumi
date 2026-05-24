@@ -43,7 +43,7 @@
       </view>
     </view>
     <view class='toggle-arrow {{showCatInfo ? "open" : ""}}'>
-      <text>{{showCatInfo ? '收起 ▲' : '展开 ▼'}}</text>
+      <text>{{showCatInfo ? '收起档案 ▲' : '展开档案 ▼'}}</text>
     </view>
   </view>
 
