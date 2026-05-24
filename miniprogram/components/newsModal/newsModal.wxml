@@ -20,5 +20,12 @@
       <view class='wx-modal-btn' catchtap='_cancelEvent'>{{ cancelText }}</view>
       <view class='wx-modal-btn' catchtap='_confirmEvent'>{{ confirmText }}</view>
     </view>
+
+    <view class='wx-modal-mute' catchtap='_toggleMute'>
+      <view class='mute-checkbox {{muteWeek ? "checked" : ""}}'>
+        <text wx:if="{{muteWeek}}">✓</text>
+      </view>
+      <text class='mute-text'>本周不再弹出</text>
+    </view>
   </view>
 </popup>

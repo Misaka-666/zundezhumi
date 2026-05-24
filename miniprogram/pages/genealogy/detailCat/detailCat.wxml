@@ -28,7 +28,26 @@
     </block>
   </swiper>
 
-  <view class='info' id='info-box'>
+  <view class='info-toggle-bar' bindtap='toggleCatInfo' hover-class='toggle-hover'>
+    <view class='toggle-center'>
+      <view class='toggle-name-row'>
+        <text class='toggle-name'>{{cat.name}}</text>
+        <image mode='aspectFill' class='toggle-gender' wx:if='{{cat.gender === "公"}}' src="/pages/public/images/card/card/male.png"></image>
+        <image mode='aspectFill' class='toggle-gender' wx:if='{{cat.gender === "母"}}' src="/pages/public/images/card/card/female.png"></image>
+        <text class='toggle-tag' wx:if="{{cat.adopt != undefined}}">{{adopt_desc[cat.adopt]}}</text>
+      </view>
+      <view class='toggle-stats'>
+        <text class='toggle-stat' wx:if="{{cat.popularity != undefined}}">🔥 {{cat.popularity + (cat.photo_count_total? cat.photo_count_total * photoPopWeight: 0)}}</text>
+        <text class='toggle-stat'>💬 {{cat.comment_count || 0}}</text>
+        <text class='toggle-stat'>❤️ {{cat.follow_count || 0}}</text>
+      </view>
+    </view>
+    <view class='toggle-arrow {{showCatInfo ? "open" : ""}}'>
+      <text>{{showCatInfo ? '收起 ▲' : '展开 ▼'}}</text>
+    </view>
+  </view>
+
+  <view class='info' id='info-box' wx:if="{{showCatInfo}}">
     <view class="identity">
       <view class='name'>{{cat.name}}</view>
       <block wx:if='{{cat.gender}}'>

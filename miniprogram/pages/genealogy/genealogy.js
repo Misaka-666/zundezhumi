@@ -127,6 +127,7 @@ Page({
     
     // 先把设置拿到
     this.jsData.catsStep = settings['catsStep'] || 1;
+    this.jsData.newsPopupFrequency = settings['newsPopupFrequency'] || 'always';
     
     // 启动加载
     await Promise.all([
@@ -993,14 +994,14 @@ Page({
     }
   },
 
-  _cancelEvent() {
+  _cancelEvent(e) {
     this.newsModal.hideNewsModal();
-    this.setNewsVisited();
+    this.setNewsVisited(e.detail?.muteWeek);
   },
   
-  _confirmEvent() {
+  _confirmEvent(e) {
     this.newsModal.hideNewsModal();
-    this.setNewsVisited();
+    this.setNewsVisited(e.detail?.muteWeek);
     wx.navigateTo({
       url: `/pages/news/detailNews/detailNews?news_id=${this.data.newsList[0]._id}`,
     });
@@ -1008,13 +1009,33 @@ Page({
   
   checkNewsVisited() {
     const news_id = this.data.newsList[0]?._id;
-    return news_id ? cache.getCacheItem(`visit-news-${news_id}`) : false;
+    if (!news_id) return false;
+
+    if (!!cache.getCacheItem(`visit-news-weekly`)) return true;
+
+    const frequency = this.jsData.newsPopupFrequency || 'always';
+    if (frequency === 'always') return false;
+    if (frequency === 'daily') return !!cache.getCacheItem(`visit-news-daily`);
+    if (frequency === 'weekly') return !!cache.getCacheItem(`visit-news-weekly`);
+    return !!cache.getCacheItem(`visit-news-${news_id}`);
   },
-  
-  setNewsVisited() {
+  setNewsVisited(forceWeekly) {
     const news_id = this.data.newsList[0]?._id;
-    if (news_id) {
-      cache.setCacheItem(`visit-news-${news_id}`, true, cache.cacheTime.genealogyNews);
+    if (!news_id) return;
+
+    if (forceWeekly) {
+      cache.setCacheItem(`visit-news-weekly`, true, 24 * 7);
+      return;
+    }
+
+    const frequency = this.jsData.newsPopupFrequency || 'always';
+    if (frequency === 'always') return;
+    if (frequency === 'daily') {
+      cache.setCacheItem(`visit-news-daily`, true, 24);
+    } else if (frequency === 'weekly') {
+      cache.setCacheItem(`visit-news-weekly`, true, 24 * 7);
+    } else {
+      cache.setCacheItem(`visit-news-${news_id}`, true, 24 * 365);
     }
   },
 

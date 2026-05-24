@@ -90,6 +90,9 @@ Page({
     // 疫苗记录相关
     showVaccineHistory: false,
     vaccineHistory: [],
+
+    // 是否展开猫猫档案
+    showCatInfo: false,
   },
 
   jsData: {
@@ -968,6 +971,13 @@ Page({
   toVaccineDetail() {
     this.setData({
       showVaccineHistory: true
+    });
+  },
+
+  // 展开/收起猫猫档案
+  toggleCatInfo() {
+    this.setData({
+      showCatInfo: !this.data.showCatInfo
     });
   },
 

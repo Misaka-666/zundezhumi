@@ -124,6 +124,17 @@ module.exports = {
       type: "number",
       tip: "每张猫猫照片增加的人气值"
     },
+    newsPopupFrequency: {
+      type: "select",
+      tip: "首页公告弹窗出现频率",
+      default: "always",
+      choices: [
+        { val: "always", name: "每次启动都显示" },
+        { val: "daily", name: "每天显示一次" },
+        { val: "weekly", name: "每周显示一次" },
+        { val: "once", name: "每个公告仅显示一次" }
+      ]
+    },
   },
   subscribe: {
     tip: "订阅消息模板",
