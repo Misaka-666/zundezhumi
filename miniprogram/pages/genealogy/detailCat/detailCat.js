@@ -384,7 +384,7 @@ Page({
     }
     cat.photo = cat.photo.concat(res);
     this.setData({
-      cat: cat
+      "cat.photo": cat.photo
     });
   },
 

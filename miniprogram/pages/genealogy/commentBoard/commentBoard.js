@@ -318,7 +318,9 @@ Page({
 
     // 填充userInfo
     await fillUserInfo(res, "user_openid", "userInfo");
-    for (var item of res) {
+    var oldLen = comments.length - res.length;
+    for (var i = 0; i < res.length; i++) {
+      var item = res[i];
       item.datetime = formatDate(new Date(item.create_date), "yyyy-MM-dd hh:mm:ss")
       // 便签旋转
       item.rotate = randomInt(-5, 5);
@@ -329,7 +331,11 @@ Page({
     }
 
     console.log(comments);
-    this.setData({ comments });
+    var updates = {};
+    for (var k = oldLen; k < comments.length; k++) {
+      updates["comments[" + k + "]"] = comments[k];
+    }
+    this.setData(updates);
 
   },
 

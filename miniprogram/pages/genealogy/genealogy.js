@@ -490,19 +490,17 @@ Page({
     }));
     
     if (this.jsData.loadingLock !== nowLoadingLock) return false;
-    
-    const updatedCats = cats.map(c => {
+
+    var updates = {};
+    cats.forEach(function(c, i) {
       if (cat2photos[c._id]) {
-        return {
-          ...c,
-          photo: cat2photos[c._id],
-          comment_count: cat2commentCount[c._id]
-        };
+        updates["cats[" + i + "].photo"] = cat2photos[c._id];
+        updates["cats[" + i + "].comment_count"] = cat2commentCount[c._id];
       }
-      return c;
     });
-    
-    this.setData({ cats: updatedCats });
+    if (Object.keys(updates).length > 0) {
+      this.setData(updates);
+    }
   },
 
   bindImageLoaded(e) {

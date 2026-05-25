@@ -24,39 +24,38 @@ Page({
   onLoad: async function (options) {
     if (await checkAuth(this, 1)) {
       this.reload();
-      // 监听反馈更新时间
       app.globalData.eventBus.$on('feedbackUpdated', this.handleFeedbackUpdate);
     }
   },
-  handleFeedbackUpdate: function(payload) {
-    console.log('收到反馈更新事件:', payload);
-    
-    // 更新特定反馈项
-    const feedbacks = this.data.feedbacks.map(fb => {
-      if (fb._id === payload.id) {
-        return {
-          ...fb,
-          replied: true,
-          replyDate: new Date(),
-          replyDateStr: formatDate(new Date(), "yyyy-MM-dd hh:mm:ss"),
-          replyInfo: payload.replyInfo
-        };
-      }
-      return fb;
-    });
-    
-    this.setData({ feedbacks });
+
+  onUnload: function() {
+    app.globalData.eventBus.$off('feedbackUpdated', this.handleFeedbackUpdate);
   },
 
+  handleFeedbackUpdate: function(payload) {
+    console.log('收到反馈更新事件:', payload);
 
+    var feedbacks = this.data.feedbacks;
+    var updates = {};
+    for (var i = 0; i < feedbacks.length; i++) {
+      if (feedbacks[i]._id === payload.id) {
+        updates["feedbacks[" + i + "].replied"] = true;
+        updates["feedbacks[" + i + "].replyDate"] = new Date();
+        updates["feedbacks[" + i + "].replyDateStr"] = formatDate(new Date(), "yyyy-MM-dd hh:mm:ss");
+        updates["feedbacks[" + i + "].replyInfo"] = payload.replyInfo;
+        break;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      this.setData(updates);
+    }
+  },
 
   async loadFeedbacks() {
     const nowLoaded = this.data.feedbacks.length;
     var { result: feedbacks } = await app.mpServerless.db.collection('feedback').find({ dealed: this.data.checkHistory }, { sort: { openDate: -1 }, skip: nowLoaded, limit: step })
     console.log("[loadFeedbacks] -", feedbacks);
-    // 填充userInfo
     await fillUserInfo(feedbacks, "openid", "userInfo");
-    // 获取对应猫猫信息；将Date对象转化为字符串；判断是否已回复
     for (let i = 0; i < feedbacks.length; ++i) {
       if (feedbacks[i].cat_id != undefined) {
         const { result: cat } = await app.mpServerless.db.collection('cat').findOne({ _id: feedbacks[i].cat_id }, {
@@ -70,10 +69,13 @@ Page({
         feedbacks[i].replyDateStr = formatDate(feedbacks[i].replyDate, "yyyy-MM-dd hh:mm:ss");
       }
     }
+    var oldLen = this.data.feedbacks.length;
     this.data.feedbacks.push(...feedbacks);
-    this.setData({
-      feedbacks: this.data.feedbacks
-    });
+    var updates = {};
+    for (var k = oldLen; k < this.data.feedbacks.length; k++) {
+      updates["feedbacks[" + k + "]"] = this.data.feedbacks[k];
+    }
+    this.setData(updates);
   },
 
   async refreshStatus() {
@@ -93,7 +95,7 @@ Page({
     this.setData({
       total: fbRes.total,
     });
-    this.data.feedbacks = []; // 清空，loadFeedbacks再填充
+    this.data.feedbacks = [];
     await this.loadFeedbacks();
     wx.hideLoading();
   },
@@ -106,12 +108,9 @@ Page({
         console.log("[requestSubscribeMessage] - subscribeSet:", res);
         if ('subscriptionsSetting' in res) {
           if (!(notifyChkFeedbackTplId in res['subscriptionsSetting'])) {
-            // 第一次请求
             requestNotice('notifyChkFeedback');
-            // console.log("[requestSubscribeMessage] - firstRequest");
           } else if (res.subscriptionsSetting[notifyChkFeedbackTplId] === 'reject') {
-            // console.log("已拒绝");// 不再请求/重复弹出toast
-            // requestNotice('notifyChkFeedback');
+            // console.log("已拒绝");
           } else if (res.subscriptionsSetting[notifyChkFeedbackTplId] === 'accept') {
             console.log('[requestSubscribeMessage] - 重新请求下个一次性订阅');
             requestNotice('notifyChkFeedback');
@@ -163,10 +162,8 @@ Page({
     });
 
     console.log("[bindCheck] - 反馈已处理：" + feedback._id);
-    // 直接从列表里去掉这个反馈，不完全加载了
     const feedbacks = this.data.feedbacks;
     const new_feedbacks = feedbacks.filter((fb) => {
-      // 这个feedback是用户点击的feedback，在上面定义的
       return fb._id != feedback._id;
     });
     this.setData({
@@ -185,7 +182,6 @@ Page({
     });
   },
 
-  // 点击所属猫猫名称，可以跳转到猫猫详情
   toCatDetail(e) {
     const cat_id = e.currentTarget.dataset.cat_id;
     wx.navigateTo({
@@ -193,7 +189,6 @@ Page({
     })
   },
 
-  // 长按所属猫猫名称，可以跳转到猫信息修改
   toCatManage(e) {
     const cat_id = e.currentTarget.dataset.cat_id;
     wx.navigateTo({

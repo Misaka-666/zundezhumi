@@ -610,9 +610,12 @@ Page({
     }
     // 更新feed数据，添加新项到现有feed中
     if (newFeedItems.length > 0) {
-      this.setData({
-        feed: [...feed, ...newFeedItems]
-      });
+      var oldLen = feed.length;
+      var updates = {};
+      for (var i = 0; i < newFeedItems.length; i++) {
+        updates["feed[" + (oldLen + i) + "]"] = newFeedItems[i];
+      }
+      this.setData(updates);
     }
   },
 
