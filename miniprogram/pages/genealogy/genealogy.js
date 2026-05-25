@@ -996,46 +996,48 @@ Page({
 
   _cancelEvent(e) {
     this.newsModal.hideNewsModal();
-    this.setNewsVisited(e.detail?.muteWeek);
+    this.setNewsVisited(e.detail.muteWeek);
   },
-  
+
   _confirmEvent(e) {
     this.newsModal.hideNewsModal();
-    this.setNewsVisited(e.detail?.muteWeek);
+    this.setNewsVisited(e.detail.muteWeek);
     wx.navigateTo({
-      url: `/pages/news/detailNews/detailNews?news_id=${this.data.newsList[0]._id}`,
+      url: "/pages/news/detailNews/detailNews?news_id=" + this.data.newsList[0]._id,
     });
   },
-  
-  checkNewsVisited() {
-    const news_id = this.data.newsList[0]?._id;
+
+  checkNewsVisited: function() {
+    var news_id = this.data.newsList[0] && this.data.newsList[0]._id;
     if (!news_id) return false;
 
-    if (!!cache.getCacheItem(`visit-news-weekly`)) return true;
+    var wc = cache.getCacheItem("visit-news-weekly");
+    if (wc) return true;
 
-    const frequency = this.jsData.newsPopupFrequency || 'always';
-    if (frequency === 'always') return false;
-    if (frequency === 'daily') return !!cache.getCacheItem(`visit-news-daily`);
-    if (frequency === 'weekly') return !!cache.getCacheItem(`visit-news-weekly`);
-    return !!cache.getCacheItem(`visit-news-${news_id}`);
+    var frequency = this.jsData.newsPopupFrequency || "always";
+    if (frequency === "always") return false;
+    if (frequency === "daily") return !!cache.getCacheItem("visit-news-daily");
+    if (frequency === "weekly") return !!cache.getCacheItem("visit-news-weekly");
+    return !!cache.getCacheItem("visit-news-" + news_id);
   },
-  setNewsVisited(forceWeekly) {
-    const news_id = this.data.newsList[0]?._id;
+
+  setNewsVisited: function(forceWeekly) {
+    var news_id = this.data.newsList[0] && this.data.newsList[0]._id;
     if (!news_id) return;
 
     if (forceWeekly) {
-      cache.setCacheItem(`visit-news-weekly`, true, 24 * 7);
+      cache.setCacheItem("visit-news-weekly", true, 24 * 7);
       return;
     }
 
-    const frequency = this.jsData.newsPopupFrequency || 'always';
-    if (frequency === 'always') return;
-    if (frequency === 'daily') {
-      cache.setCacheItem(`visit-news-daily`, true, 24);
-    } else if (frequency === 'weekly') {
-      cache.setCacheItem(`visit-news-weekly`, true, 24 * 7);
+    var frequency = this.jsData.newsPopupFrequency || "always";
+    if (frequency === "always") return;
+    if (frequency === "daily") {
+      cache.setCacheItem("visit-news-daily", true, 24);
+    } else if (frequency === "weekly") {
+      cache.setCacheItem("visit-news-weekly", true, 24 * 7);
     } else {
-      cache.setCacheItem(`visit-news-${news_id}`, true, 24 * 365);
+      cache.setCacheItem("visit-news-" + news_id, true, 24 * 365);
     }
   },
 

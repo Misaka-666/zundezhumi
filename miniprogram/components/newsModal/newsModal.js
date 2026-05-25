@@ -57,19 +57,17 @@ Component({
         })
       },
       _toggleMute() {
-        this.setData({
-          muteWeek: !this.data.muteWeek
-        })
+        this.setData({ muteWeek: !this.data.muteWeek });
       },
       _cancelEvent(){
-        const muteWeek = this.data.muteWeek;
+        var muteWeek = this.data.muteWeek;
         this.hideNewsModal();
-        this.triggerEvent("cancelEvent", { muteWeek: muteWeek })
+        this.triggerEvent("cancelEvent", { muteWeek: muteWeek });
       },
       _confirmEvent(){
-        const muteWeek = this.data.muteWeek;
+        var muteWeek = this.data.muteWeek;
         this.hideNewsModal();
-        this.triggerEvent("confirmEvent", { muteWeek: muteWeek })
+        this.triggerEvent("confirmEvent", { muteWeek: muteWeek });
       }
     }
   })
