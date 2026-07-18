@@ -44,7 +44,8 @@
     "pages/info/dashboard/dashboard",
     "pages/genealogy/detailCat/relationGraph/relationGraph",
     "pages/genealogy/applyMapAccess/applyMapAccess",
-    "pages/map/index/index"
+    "pages/map/index/index",
+    "pages/guessCat/guessCat"
   ],
   "subPackages": [
     {

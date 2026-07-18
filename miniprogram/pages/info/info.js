@@ -41,6 +41,10 @@ Page({
         icon: "/pages/public/images/info/btn/reward.svg",
         label: "投喂罐头",
         path: "/pages/info/reward/reward",
+      }, {
+        icon: "/pages/public/images/info/btn/guessCat.svg",
+        label: "猜猫猫",
+        path: "/pages/guessCat/guessCat",
       }
     ],
 

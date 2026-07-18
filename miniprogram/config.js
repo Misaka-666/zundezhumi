@@ -6,7 +6,7 @@
 
 module.exports = {
   // 版本号
-  app_version: "v1.1.1",
+  app_version: "v1.2.0",
   // 小程序appid
   app_id: "wx479ea3f647926816",
   // EMAS空间ID
@@ -191,6 +191,20 @@ module.exports = {
       expired_tip: "邀请链接已过期...请联系管理员~",
       already_tip: "你已经是特邀用户啦~",
       success_tip: "`已成为特邀用户~",
+    },
+    // 猜猫猫，pages/guessCat/guessCat
+    guess_cat: {
+      share_tip: "猜猫猫",
+      loading_tip: "正在出题...",
+      progress_tip: "第 ",
+      score_tip: "得分 ",
+      result_title: "本局结果",
+      new_best_tip: "🎉 刷新最佳记录！",
+      best_record_tip: "历史最佳：",
+      btn_restart: "再来一局",
+      btn_back: "返回",
+      error_not_enough: "猫咪照片不足，暂无法游戏\n多多上传照片来丰富题库吧~",
+      error_load: "出题失败，请稍后再试~",
     },
   }
 }

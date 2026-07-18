@@ -295,7 +295,14 @@ async function getTempCOS(options) {
 async function catFace(options) {
   const app = getApp();
   const openid = await getCurrentUserOpenid();
-  const transport = app.mpServerless.transport;
+  const transport = app.mpServerless && app.mpServerless.transport;
+  // demo 模式或无 transport：直接调用（mock.invoke 返回占位结果）
+  if (!transport || typeof transport.setTimeout !== 'function') {
+    return (await app.mpServerless.function.invoke('catFace', {
+      ...options,
+      openid: openid,
+    })).result;
+  }
   const oldTimeout = transport.timeoutOption;
   transport.setTimeout(30000);
   try {
@@ -304,7 +311,8 @@ async function catFace(options) {
       openid: openid,
     })).result;
   } finally {
-    transport.setTimeout(oldTimeout);
+    // 恢复到原值；读取不到有效数值则恢复全局默认 15s
+    transport.setTimeout(typeof oldTimeout === 'number' ? oldTimeout : 15000);
   }
 }
 

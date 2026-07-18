@@ -1,0 +1,79 @@
+<!-- 猜猫猫游戏页 -->
+<view class="guess-page">
+
+  <!-- 加载中 -->
+  <view wx:if="{{phase === 'loading'}}" class="guess-loading">
+    <view class="loading-cat">🐱</view>
+    <view class="loading-text">{{cfg.loading_tip}}</view>
+  </view>
+
+  <!-- 猫数不足 / 出错 -->
+  <view wx:elif="{{phase === 'error'}}" class="guess-error">
+    <view class="error-icon">😿</view>
+    <view class="error-text">{{errorMsg}}</view>
+    <view class="btn-back" bindtap="onBack">{{cfg.btn_back}}</view>
+  </view>
+
+  <!-- 答题中 -->
+  <view wx:elif="{{phase === 'playing'}}" class="guess-playing">
+    <!-- 顶部进度 -->
+    <view class="quiz-header">
+      <view class="quiz-progress">{{cfg.progress_tip}}{{currentIndex + 1}}/{{total}}</view>
+      <view class="quiz-score">{{cfg.score_tip}}<text class="score-num">{{score}}</text></view>
+    </view>
+
+    <!-- 进度条 -->
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{(currentIndex + (answered ? 1 : 0)) * 100 / total}}%;"></view>
+    </view>
+
+    <!-- 猫咪照片 —— 揭晓卡片 -->
+    <view class="photo-card {{answered ? 'revealed' : 'entering'}}">
+      <view class="photo-glow"></view>
+      <image wx:if="{{question.photoUrl}}" class="cat-photo" src="{{question.photoUrl}}" mode="aspectFill" show-menu-by-longpress="false"></image>
+      <view wx:else class="photo-placeholder">{{cfg.loading_tip}}</view>
+      <!-- 答对/答错浮层提示 -->
+      <view wx:if="{{answered}}" class="photo-badge {{isCorrect ? 'badge-correct' : 'badge-wrong'}}">
+        <text>{{isCorrect ? '✓' : '✗'}}</text>
+      </view>
+    </view>
+
+    <!-- 选项按钮 -->
+    <view class="options">
+      <view
+        wx:for="{{question.options}}"
+        wx:key="*this"
+        class="option {{answered && item === question.correctName ? 'correct' : ''}} {{answered && item === selectedName && !isCorrect ? 'wrong' : ''}}"
+        bindtap="onSelect"
+        data-name="{{item}}"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 结算页 —— 成绩卡片 -->
+  <view wx:elif="{{phase === 'result'}}" class="guess-result">
+    <view class="result-card">
+      <!-- 环形进度 -->
+      <view class="result-ring">
+        <view class="ring-bg"></view>
+        <view class="ring-fill" style="background: conic-gradient(var(--color-primary) {{total > 0 ? score * 360 / total : 0}}deg, var(--color-gray-normal) 0deg);"></view>
+        <view class="ring-center">
+          <text class="ring-score">{{score}}</text>
+          <text class="ring-total">/{{total}}</text>
+        </view>
+      </view>
+      <!-- 评级 -->
+      <view class="result-rank">{{resultRank.emoji}} {{resultRank.title}}</view>
+      <view class="result-rank-desc">{{resultRank.desc}}</view>
+      <!-- 最佳记录 -->
+      <view wx:if="{{isNewBest}}" class="result-newbest">{{cfg.new_best_tip}}</view>
+      <view class="result-best">{{cfg.best_record_tip}}<text class="best-num">{{bestRecord}}</text></view>
+    </view>
+    <!-- 按钮 -->
+    <view class="result-btns">
+      <view class="btn-restart" bindtap="onRestart">{{cfg.btn_restart}}</view>
+      <view class="btn-back" bindtap="onBack">{{cfg.btn_back}}</view>
+    </view>
+  </view>
+
+</view>

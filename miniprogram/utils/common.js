@@ -172,8 +172,8 @@ async function _needResign(url) {
 
   let params = parseQueryParams(url);
   let signTime = parseInt(params["q-sign-time"]);
-  // 检查是否有签名，签名是否过期
-  if (!signTime || getDeltaHours(signTime) * 3600 > sign_expires_tencent_cos) {
+  // q-sign-time 为秒级时间戳，getDeltaHours 内部按毫秒处理，需先转毫秒
+  if (!signTime || getDeltaHours(signTime * 1000) * 3600 > sign_expires_tencent_cos) {
     return true;
   }
 

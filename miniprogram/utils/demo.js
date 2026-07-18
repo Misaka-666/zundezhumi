@@ -20,41 +20,63 @@ const DEMO_CATS = [
   { _id: 'demo-cat-11', name: '布丁', campus: '南校园', area: '惺亭', birthday: '2022-08-30', colour: '橘白', character: '傲娇', characteristics: '傲娇', habit: '若即若离', popularity: 88, gender: '母', status_adopt: '0' },
 ];
 
-const DEMO_PHOTOS = [
-  { cat_id: 'demo-cat-1', latitude: 23.102685, longitude: 113.299872, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-15', shooting_date: '2026-05-10', photographer: '猫友小王', marker_type: 'orange' },
-  { cat_id: 'demo-cat-2', latitude: 23.096856, longitude: 113.297080, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-14', shooting_date: '2026-05-09', photographer: '猫友小李', marker_type: 'calico' },
-  { cat_id: 'demo-cat-3', latitude: 23.099602, longitude: 113.299638, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-13', shooting_date: '2026-05-08', photographer: '匿名猫友', marker_type: 'black' },
-  { cat_id: 'demo-cat-4', latitude: 23.100800, longitude: 113.296500, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-12', shooting_date: '2026-05-07', photographer: '猫友小张', marker_type: 'white' },
-  { cat_id: 'demo-cat-5', latitude: 23.104200, longitude: 113.294800, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-11', shooting_date: '2026-05-06', photographer: '猫友小赵', marker_type: 'orange' },
-  { cat_id: 'demo-cat-6', latitude: 23.098500, longitude: 113.301200, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-10', shooting_date: '2026-05-05', photographer: '匿名猫友', marker_type: 'black' },
-  { cat_id: 'demo-cat-7', latitude: 23.101500, longitude: 113.298000, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-09', shooting_date: '2026-05-04', photographer: '猫友小陈', marker_type: 'white' },
-  { cat_id: 'demo-cat-8', latitude: 23.103000, longitude: 113.297500, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-08', shooting_date: '2026-05-03', photographer: '匿名猫友', marker_type: 'orange' },
-  { cat_id: 'demo-cat-9', latitude: 23.099000, longitude: 113.298500, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-07', shooting_date: '2026-05-02', photographer: '猫友小周', marker_type: 'tabby' },
-  { cat_id: 'demo-cat-10', latitude: 23.105000, longitude: 113.300500, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-06', shooting_date: '2026-05-01', photographer: '匿名猫友', marker_type: 'white' },
-  { cat_id: 'demo-cat-11', latitude: 23.097500, longitude: 113.295000, verified: true,
-    photo_id: '/pages/public/images/system/user.png',
-    create_date: '2026-05-05', shooting_date: '2026-04-30', photographer: '猫友小吴', marker_type: 'calico' },
+const DEMO_PHOTO_IMGS = [
+  '/images/markers/orange.jpg',
+  '/images/markers/calico.jpg',
+  '/images/markers/black.jpg',
+  '/images/markers/white.jpg',
+  '/images/markers/tabby.jpg',
+  '/images/markers/blue.jpg',
 ];
+
+// 猜猫猫 Demo 模式需要可区分的照片，按颜色映射到 markers 图片
+const DEMO_CAT_PHOTO_MAP = {
+  'demo-cat-1': '/images/markers/orange.jpg',
+  'demo-cat-2': '/images/markers/calico.jpg',
+  'demo-cat-3': '/images/markers/black.jpg',
+  'demo-cat-4': '/images/markers/white.jpg',
+  'demo-cat-5': '/images/markers/orange.jpg',
+  'demo-cat-6': '/images/markers/black.jpg',
+  'demo-cat-7': '/images/markers/white.jpg',
+  'demo-cat-8': '/images/markers/orange.jpg',
+  'demo-cat-9': '/images/markers/tabby.jpg',
+  'demo-cat-10': '/images/markers/white.jpg',
+  'demo-cat-11': '/images/markers/calico.jpg',
+};
+
+// 为每只 demo 猫生成 2~3 张已审核照片，模拟真实题库
+function _buildDemoPhotos() {
+  const baseDates = ['2026-05-15','2026-05-14','2026-05-13','2026-05-12','2026-05-11','2026-05-10','2026-05-09','2026-05-08','2026-05-07','2026-05-06','2026-05-05'];
+  const photographers = ['猫友小王','猫友小李','匿名猫友','猫友小张','猫友小赵','猫友小陈','猫友小周','猫友小吴'];
+  const coords = [
+    [23.102685, 113.299872],[23.096856, 113.297080],[23.099602, 113.299638],
+    [23.100800, 113.296500],[23.104200, 113.294800],[23.098500, 113.301200],
+    [23.101500, 113.298000],[23.103000, 113.297500],[23.099000, 113.298500],
+    [23.105000, 113.300500],[23.097500, 113.295000]
+  ];
+  const photos = [];
+  for (let i = 0; i < DEMO_CATS.length; i++) {
+    const cat = DEMO_CATS[i];
+    const img = DEMO_CAT_PHOTO_MAP[cat._id] || DEMO_PHOTO_IMGS[i % DEMO_PHOTO_IMGS.length];
+    // marker_type 从图片文件名推导，避免硬编码数组越界
+    const mt = img.split('/').pop().replace('.jpg', '');
+    // 每只猫 2 张照片，让猜猫猫随机抽取有变化
+    for (let j = 0; j < 2; j++) {
+      photos.push({
+        cat_id: cat._id,
+        latitude: coords[i][0], longitude: coords[i][1], verified: true,
+        photo_id: img,
+        photo_compressed: img,
+        create_date: baseDates[i], shooting_date: baseDates[i],
+        photographer: photographers[(i + j) % photographers.length],
+        marker_type: mt
+      });
+    }
+  }
+  return photos;
+}
+
+const DEMO_PHOTOS = _buildDemoPhotos();
 
 const DEMO_MARKER_ICONS = [
   { _id: 'mi-1', name: '白猫', img: '/images/markers/white.jpg', enabled: true },
