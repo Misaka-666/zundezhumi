@@ -284,11 +284,22 @@ Page({
     });
 
     // 提交到排行榜（每局都提交，确保数据写入）
+    let submitMsg = '';
     try {
       const res = await submitScore(mode, score);
-      this.setData({ submitStatus: (res && res.ok) ? "success" : "fail" });
+      if (res && res.ok) {
+        submitMsg = 'success';
+      } else {
+        submitMsg = 'fail:' + JSON.stringify(res);
+      }
     } catch (e) {
-      this.setData({ submitStatus: "fail" });
+      submitMsg = 'error:' + e.message;
+    }
+    this.setData({ submitStatus: submitMsg === 'success' ? "success" : "fail" });
+    if (submitMsg === 'success') {
+      wx.showToast({ title: '成绩已上传', icon: 'success', duration: 2000 });
+    } else {
+      wx.showModal({ title: '上传失败', content: submitMsg, showCancel: false });
     }
   },
 
