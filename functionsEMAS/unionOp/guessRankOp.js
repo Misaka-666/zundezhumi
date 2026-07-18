@@ -6,7 +6,7 @@
 //   - classic：按累计总分降序（去重兜底）
 //   - endless/timed：按单局最高分降序
 // op=getMyRank: 获取自己在指定模式的最佳成绩和全服排名位次
-//   - classic：累计总分（取最高那条，兼容历史脏数据）
+//   - classic：累计总分（累加所有记录求和，兼容历史脏数据）
 //   - endless/timed：单局最高
 module.exports = async (ctx) => {
     const openid = ctx.args?.openid;
@@ -135,7 +135,7 @@ module.exports = async (ctx) => {
         }).slice(0, 100).map(r => ({
             _openid: r._openid,
             score: isClassic ? classicTotalMap.get(r._openid) : r.score,
-            playCount: isClassic ? (playCountMap.get(r._openid) || 1) : (playCountMap.get(r._openid) || 1)
+            playCount: isClassic ? (r.playCount || 1) : (playCountMap.get(r._openid) || 1)
         }));
         return { ok: true, rankList: rankList };
     }
@@ -155,8 +155,23 @@ module.exports = async (ctx) => {
         if (isClassic) {
             // 经典模式：累加所有记录的 score 求总分（兼容脏数据）
             myBest = myRecords.reduce((sum, r) => sum + (r.score || 0), 0);
-            // playCount 也累加各记录的 playCount 字段
             myPlayCount = myRecords.reduce((sum, r) => sum + (r.playCount || 1), 0);
+
+            // 经典排名：查所有用户记录，按 _openid 汇总累加总分，再统计比自己高的
+            const { result: allRecords } = await coll.find(
+                { mode: mode },
+                { sort: { score: -1 }, limit: 500, projection: { _openid: 1, score: 1 } }
+            );
+            const userTotalMap = new Map();
+            for (const r of (allRecords || [])) {
+                userTotalMap.set(r._openid, (userTotalMap.get(r._openid) || 0) + (r.score || 0));
+            }
+            let higherCount = 0;
+            for (const [uid, total] of userTotalMap) {
+                if (uid === openid) continue;
+                if (total > myBest) higherCount++;
+            }
+            return { ok: true, myBest: myBest, myRank: higherCount + 1, myPlayCount: myPlayCount };
         } else {
             // 无限/限时：取单局最高
             myBest = myRecords[0].score;
