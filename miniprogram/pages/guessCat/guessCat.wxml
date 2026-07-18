@@ -66,7 +66,7 @@
     <!-- 猫咪照片 —— 揭晓卡片 -->
     <view class="photo-card {{answered ? 'revealed' : 'entering'}}">
       <view class="photo-glow"></view>
-      <image wx:if="{{question.photoUrl}}" class="cat-photo" src="{{question.photoUrl}}" mode="aspectFill" show-menu-by-longpress="false"></image>
+      <image wx:if="{{question.photoUrl}}" class="cat-photo" src="{{question.photoUrl}}" mode="aspectFit" show-menu-by-longpress="false"></image>
       <view wx:else class="photo-placeholder">{{cfg.loading_tip}}</view>
       <!-- 答对/答错浮层提示 -->
       <view wx:if="{{answered}}" class="photo-badge {{isCorrect ? 'badge-correct' : 'badge-wrong'}}">
