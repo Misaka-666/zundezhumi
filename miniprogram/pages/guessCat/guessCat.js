@@ -248,7 +248,7 @@ Page({
     }
   },
 
-  finishQuiz() {
+  async finishQuiz() {
     // 重入保护：限时模式倒计时归零与答错延迟可能同时触发
     if (this._finishing) return;
     this._finishing = true;
