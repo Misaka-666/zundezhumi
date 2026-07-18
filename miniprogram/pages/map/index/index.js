@@ -37,11 +37,11 @@ Page({
     catList: [],       // 猫列表（直接从 cat 集合获取）
     catMap: {},        // cat_id -> cat 信息
     avatarMap: {},     // cat_id -> avatar photo 对象
-    userLocated: false, // 是否已获取用户定位
     loaded: false,      // 首次加载完成标记
     campusCenters: {},  // { campusName: { latitude, longitude, scale } }
     markerIconMap: {},  // cat_id -> 已绘制好的圆形头像临时文件路径（避免重绘闪动）
     avatarDrawn: false, // 圆形头像是否已首次绘制完成（仅首次进入页面绘制）
+    // userLocated: false, // 是否已获取用户定位（已移除定位功能）
     clusterIconCache: {}, // { count: tempFilePath } 数量圈图标缓存（按猫数量复用）
     currentScale: null,   // 当前地图缩放级别（onRegionChange 更新）
   },
@@ -66,52 +66,13 @@ Page({
     }
     this.setData({ demoMode: isDemoMode() });
     this.loadCampusCenters();
-    this.locateUser();
+    // this.locateUser(); // 已移除用户定位，改为直接加载地图数据
+    this.loadMapData();
   },
 
-  // 加载校区中心坐标（从 setting.filter 的 campusCenters 字段）
-  async loadCampusCenters() {
-    try {
-      var filter = await loadFilter({ nocache: true });
-      var centers = filter && filter.campusCenters;
-      this.jsData.campusCenters = centers || {};
-      // 生成 WXML 用的按钮列表：仅包含有坐标的校区
-      var buttons = [];
-      for (var name in this.jsData.campusCenters) {
-        var c = this.jsData.campusCenters[name];
-        if (c && c.latitude != null && c.longitude != null) {
-          buttons.push({
-            name: name,
-            latitude: c.latitude,
-            longitude: c.longitude,
-            scale: c.scale || 14,
-          });
-        }
-      }
-      this.setData({ campusButtons: buttons });
-    } catch (e) {
-      console.log('加载校区中心坐标失败:', e.message);
-    }
-  },
-
-  onShow() {
-    showTab(this);
-    // 首次加载由 locateUser 触发，之后每次 onShow 刷新数据
-    // 轨迹模式下不刷新数据（预览照片等操作会触发 onShow）
-    if (this.jsData.loaded && !this.data.showTrajectory) {
-      this.loadMapData();
-      this.loadCampusCenters();
-    }
-  },
-
-  onShareAppMessage() {
-    return {
-      title: `来看看校园里的猫猫都在哪里~ - ${config.text.app_name}`,
-      path: '/pages/map/index/index'
-    };
-  },
-
-  // 获取用户定位，成功则设置地图中心
+  // ===== 以下定位功能已移除（无需申请 getFuzzyLocation 权限）=====
+  // 如需恢复，取消注释并确保 app.json 已声明 scope.userFuzzyLocation + requiredPrivateInfos
+  /*
   async locateUser() {
     try {
       // 先请求隐私协议授权
@@ -154,6 +115,52 @@ Page({
       });
     });
   },
+  */
+  // ===== 定位功能移除结束 =====
+
+  // 加载校区中心坐标（从 setting.filter 的 campusCenters 字段）
+  async loadCampusCenters() {
+    try {
+      var filter = await loadFilter({ nocache: true });
+      var centers = filter && filter.campusCenters;
+      this.jsData.campusCenters = centers || {};
+      // 生成 WXML 用的按钮列表：仅包含有坐标的校区
+      var buttons = [];
+      for (var name in this.jsData.campusCenters) {
+        var c = this.jsData.campusCenters[name];
+        if (c && c.latitude != null && c.longitude != null) {
+          buttons.push({
+            name: name,
+            latitude: c.latitude,
+            longitude: c.longitude,
+            scale: c.scale || 14,
+          });
+        }
+      }
+      this.setData({ campusButtons: buttons });
+    } catch (e) {
+      console.log('加载校区中心坐标失败:', e.message);
+    }
+  },
+
+  onShow() {
+    showTab(this);
+    // 首次加载由 onLoad 触发，之后每次 onShow 刷新数据
+    // 轨迹模式下不刷新数据（预览照片等操作会触发 onShow）
+    if (this.jsData.loaded && !this.data.showTrajectory) {
+      this.loadMapData();
+      this.loadCampusCenters();
+    }
+  },
+
+  onShareAppMessage() {
+    return {
+      title: `来看看校园里的猫猫都在哪里~ - ${config.text.app_name}`,
+      path: '/pages/map/index/index'
+    };
+  },
+
+  // 获取用户定位，成功则设置地图中心
 
   // 调用云函数 getCatLocations，从 photo 表 aggregate 获取每只猫最新位置
   async loadMapData() {

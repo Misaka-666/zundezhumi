@@ -95,16 +95,7 @@
   },
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
-  "permission": {
-    "scope.userFuzzyLocation": {
-      "desc": "用于记录猫咪照片的拍摄位置，在地图上展示猫咪分布"
-    }
-  },
   "__usePrivacyCheck__": true,
-  "requiredPrivateInfos": [
-    "getFuzzyLocation",
-    "chooseLocation"
-  ],
   "embeddedAppIdList": [
     "wxebadf544ddae62cb",
     "wxd45c635d754dbf59"
