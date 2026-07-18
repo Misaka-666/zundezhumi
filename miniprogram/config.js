@@ -209,6 +209,7 @@ module.exports = {
       btn_back: "返回",
       btn_back_to_select: "选择模式",
       rank_btn: "排行榜",
+      rank_loading_tip: "正在拉取排行榜...",
       my_rank_tip: "我的排名",
       no_my_rank_tip: "还没有成绩，去玩一局吧~",
       no_rank_tip: "暂无排行数据，快来挑战第一名！",

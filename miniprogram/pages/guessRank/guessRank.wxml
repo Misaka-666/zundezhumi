@@ -14,7 +14,7 @@
   <!-- 加载中 -->
   <view wx:if="{{loading}}" class="rank-loading">
     <view class="loading-cat">🐱</view>
-    <view class="loading-text">{{cfg.loading_tip}}</view>
+    <view class="loading-text">{{cfg.rank_loading_tip}}</view>
   </view>
 
   <!-- 排行榜列表 -->
