@@ -31,7 +31,6 @@
         <view class="rank-score">{{item.score}}<text class="rank-unit">{{tabs[activeTab].unit}}</text></view>
         <view class="rank-play-count" wx:if="{{activeTab === 0}}">{{item.playCount || 0}}局</view>
       </view>
-      <view style="height: 120rpx;"></view>
     </scroll-view>
   </block>
 
