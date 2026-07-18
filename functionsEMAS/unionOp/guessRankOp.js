@@ -108,43 +108,59 @@ module.exports = async (ctx) => {
         );
         const seen = new Map();
         const playCountMap = new Map(); // 无限/限时模式用：统计每用户记录数
+        const classicTotalMap = new Map(); // 经典模式用：累加多条脏数据求总分
         for (const r of (records || [])) {
             // 统计游玩次数（无限/限时模式按记录数）
             playCountMap.set(r._openid, (playCountMap.get(r._openid) || 0) + 1);
-            // 两种模式去重逻辑一致：取最高分
-            if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
-                seen.set(r._openid, r);
+            if (isClassic) {
+                // 经典模式：累加同一用户所有记录的 score（兼容历史脏数据）
+                classicTotalMap.set(r._openid, (classicTotalMap.get(r._openid) || 0) + (r.score || 0));
+                // 取最新日期作为排序依据
+                if (!seen.has(r._openid) || new Date(r.date) > new Date(seen.get(r._openid).date)) {
+                    seen.set(r._openid, r);
+                }
+            } else {
+                // 无限/限时：取单局最高
+                if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
+                    seen.set(r._openid, r);
+                }
             }
         }
         const rankList = Array.from(seen.values()).sort((a, b) => {
-            if (b.score !== a.score) return b.score - a.score;
+            // 经典模式按累加总分排序，无限/限时按单局最高排序
+            const aScore = isClassic ? classicTotalMap.get(a._openid) : a.score;
+            const bScore = isClassic ? classicTotalMap.get(b._openid) : b.score;
+            if (bScore !== aScore) return bScore - aScore;
             return new Date(a.date) - new Date(b.date);
         }).slice(0, 100).map(r => ({
             _openid: r._openid,
-            score: r.score,
-            playCount: isClassic ? (r.playCount || 1) : (playCountMap.get(r._openid) || 1)
+            score: isClassic ? classicTotalMap.get(r._openid) : r.score,
+            playCount: isClassic ? (playCountMap.get(r._openid) || 1) : (playCountMap.get(r._openid) || 1)
         }));
         return { ok: true, rankList: rankList };
     }
 
     // 获取自己的排名
     if (op === 'getMyRank') {
-        // 统一用 find 查自己的记录，取最高分（兼容多条脏数据）
+        // 查自己的所有记录（兼容多条脏数据）
         const { result: myRecords } = await coll.find(
             { mode: mode, _openid: openid },
-            { sort: { score: -1 }, limit: 1, projection: { score: 1, date: 1, playCount: 1 } }
+            { sort: { score: -1 }, projection: { score: 1, date: 1, playCount: 1 } }
         );
         if (!myRecords || myRecords.length === 0) {
             return { ok: true, myBest: 0, myRank: 0, myPlayCount: 0 };
         }
-        const myBest = myRecords[0].score;
-        // 游玩次数：经典模式从字段取，无限/限时用 count 查记录数
-        let myPlayCount = 0;
+        let myBest;
+        let myPlayCount;
         if (isClassic) {
-            myPlayCount = myRecords[0].playCount || 1;
+            // 经典模式：累加所有记录的 score 求总分（兼容脏数据）
+            myBest = myRecords.reduce((sum, r) => sum + (r.score || 0), 0);
+            // playCount 也累加各记录的 playCount 字段
+            myPlayCount = myRecords.reduce((sum, r) => sum + (r.playCount || 1), 0);
         } else {
-            const countRes = await coll.count({ mode: mode, _openid: openid });
-            myPlayCount = countRes.result || 0;
+            // 无限/限时：取单局最高
+            myBest = myRecords[0].score;
+            myPlayCount = myRecords.length;
         }
 
         // 查比自己高的不同用户
