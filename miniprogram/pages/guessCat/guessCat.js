@@ -274,25 +274,21 @@ Page({
       rank = this._computeTimedRank(score);
     }
 
-    // 先显示结算页（不阻塞 UI），提交状态初始为"提交中"
+    // 先显示结算页（不阻塞 UI）
     this.setData({
       phase: "result",
       bestRecord: getBestRecord(mode),
       isNewBest,
       resultRank: rank,
-      submitStatus: isNewBest ? "submitting" : "skip",
+      submitStatus: "submitting",
     });
 
-    // 仅刷新最佳或首次时提交到排行榜（节省云函数调用）
-    if (isNewBest) {
-      try {
-        console.log('[猜猫猫] 准备提交成绩:', mode, score);
-        const res = await submitScore(mode, score);
-        console.log('[猜猫猫] 提交结果:', JSON.stringify(res));
-        this.setData({ submitStatus: (res && res.ok) ? "success" : "fail" });
-      } catch (e) {
-        this.setData({ submitStatus: "fail" });
-      }
+    // 提交到排行榜（每局都提交，确保数据写入）
+    try {
+      const res = await submitScore(mode, score);
+      this.setData({ submitStatus: (res && res.ok) ? "success" : "fail" });
+    } catch (e) {
+      this.setData({ submitStatus: "fail" });
     }
   },
 

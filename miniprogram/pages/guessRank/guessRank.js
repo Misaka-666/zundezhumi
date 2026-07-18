@@ -27,13 +27,10 @@ Page({
   async loadRank(mode) {
     this.setData({ loading: true, rankList: [] });
     try {
-      console.log('[猜猫猫排行榜] 加载模式:', mode);
       const [rankList, myRankInfo] = await Promise.all([
         getRankList(mode),
         getMyRank(mode),
       ]);
-      console.log('[猜猫猫排行榜] rankList:', rankList.length, '条记录');
-      console.log('[猜猫猫排行榜] myRankInfo:', JSON.stringify(myRankInfo));
 
       // 填充用户信息（头像+昵称）
       const items = rankList.map(r => ({ ...r, userInfo: undefined }));
