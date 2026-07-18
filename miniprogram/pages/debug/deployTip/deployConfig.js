@@ -173,6 +173,7 @@ module.exports = {
     "cat": default_init_data,
     "comment": default_init_data,
     "feedback": default_init_data,
+    "guess_rank": default_init_data,
     "inter": default_init_data,
     "news": default_init_data,
     "photo": default_init_data,

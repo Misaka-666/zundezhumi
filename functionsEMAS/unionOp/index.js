@@ -25,6 +25,7 @@ const deleteCosFilesHandler = require('./deleteCosFiles.js')
 const isManagerHandler = require('./isManager.js')
 const getCatLocationsHandler = require('./getCatLocations.js')
 const getCatTrajectoryHandler = require('./getCatTrajectory.js')
+const guessRankOpHandler = require('./guessRankOp.js')
 
 const actionMap = {
     curdOp: curdOpHandler,
@@ -54,6 +55,7 @@ const actionMap = {
     isManager: isManagerHandler,
     getCatLocations: getCatLocationsHandler,
     getCatTrajectory: getCatTrajectoryHandler,
+    guessRankOp: guessRankOpHandler,
 }
 
 module.exports = async (ctx) => {

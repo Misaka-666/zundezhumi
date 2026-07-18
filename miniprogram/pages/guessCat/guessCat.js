@@ -3,7 +3,10 @@ import {
   QUIZ_TOTAL, OPTION_COUNT,
   MODE_CLASSIC, MODE_ENDLESS, MODE_TIMED,
   TIMED_DURATION,
+  CLASSIC_CORRECT, CLASSIC_WRONG, CLASSIC_BONUS,
+  computeClassicScore,
   getBestRecord, saveBestRecord,
+  submitScore,
 } from "../../utils/guessCat";
 import { text as textCfg } from "../../config";
 
@@ -41,6 +44,8 @@ Page({
     isNewBest: false,
     // 成绩评级（经典模式）
     resultRank: {},
+    // 排行榜提交状态：skip/submitting/success/fail
+    submitStatus: "skip",
     // 限时模式剩余秒数
     timeLeft: TIMED_DURATION,
     // 限时模式总答题数
@@ -152,11 +157,19 @@ Page({
     const isCorrect = name === this.data.question.correctName;
     const mode = this.data.mode;
 
+    // 经典模式按积分制累计，无限/限时模式按答对数累计
+    let newScore;
+    if (mode === MODE_CLASSIC) {
+      newScore = this.data.score + (isCorrect ? CLASSIC_CORRECT : CLASSIC_WRONG);
+    } else {
+      newScore = isCorrect ? this.data.score + 1 : this.data.score;
+    }
+
     this.setData({
       selectedName: name,
       answered: true,
       isCorrect: isCorrect,
-      score: isCorrect ? this.data.score + 1 : this.data.score,
+      score: newScore,
       answeredCount: this.data.answeredCount + 1,
     });
 
@@ -241,10 +254,17 @@ Page({
     this._finishing = true;
     this._clearAllTimers();
     const mode = this.data.mode;
-    const score = this.data.score;
+    let score = this.data.score;
     const total = this.data.total;
 
+    // 经典模式：全对额外加 BONUS 分
+    if (mode === MODE_CLASSIC && this.data.answeredCount === total && score === total * CLASSIC_CORRECT) {
+      score += CLASSIC_BONUS;
+      this.setData({ score });
+    }
+
     const isNewBest = saveBestRecord(mode, score);
+
     let rank = {};
     if (mode === MODE_CLASSIC) {
       rank = this._computeRank(score, total);
@@ -254,21 +274,33 @@ Page({
       rank = this._computeTimedRank(score);
     }
 
+    // 先显示结算页（不阻塞 UI），提交状态初始为"提交中"
     this.setData({
       phase: "result",
       bestRecord: getBestRecord(mode),
       isNewBest,
       resultRank: rank,
+      submitStatus: isNewBest ? "submitting" : "skip",
     });
+
+    // 仅刷新最佳或首次时提交到排行榜（节省云函数调用）
+    if (isNewBest) {
+      try {
+        const res = await submitScore(mode, score);
+        this.setData({ submitStatus: (res && res.ok) ? "success" : "fail" });
+      } catch (e) {
+        this.setData({ submitStatus: "fail" });
+      }
+    }
   },
 
   // 经典模式评级（按正确率）
+  // 经典模式评级（按积分制：满分120）
   _computeRank(score, total) {
-    const rate = total > 0 ? score / total : 0;
-    if (rate >= 0.9) return { emoji: "👑", title: "猫王", desc: "校园里的猫你都认识！" };
-    if (rate >= 0.7) return { emoji: "🏆", title: "猫达人", desc: "妥妥的资深猫友~" };
-    if (rate >= 0.5) return { emoji: "🐱", title: "猫学徒", desc: "再接再厉，继续了解猫猫吧~" };
-    if (rate >= 0.3) return { emoji: "😺", title: "猫新手", desc: "多去首页看看猫猫档案吧~" };
+    if (score >= 110) return { emoji: "👑", title: "猫王", desc: "校园里的猫你都认识！" };
+    if (score >= 80) return { emoji: "🏆", title: "猫达人", desc: "妥妥的资深猫友~" };
+    if (score >= 50) return { emoji: "🐱", title: "猫学徒", desc: "再接再厉，继续了解猫猫吧~" };
+    if (score >= 20) return { emoji: "😺", title: "猫新手", desc: "多去首页看看猫猫档案吧~" };
     return { emoji: "🐾", title: "猫路新人", desc: "别灰心，多多探索校园猫咪~" };
   },
 
@@ -307,6 +339,11 @@ Page({
   // 返回上一页
   onBack() {
     wx.navigateBack();
+  },
+
+  // 去排行榜
+  onGoRank() {
+    wx.navigateTo({ url: "/pages/guessRank/guessRank" });
   },
 
   onShareAppMessage() {

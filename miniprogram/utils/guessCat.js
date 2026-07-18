@@ -4,6 +4,7 @@ import { getCatItemMulti } from "./cat";
 import { shuffle, randomInt } from "./utils";
 import { getCacheItem, setCacheItem, cacheTime } from "./cache";
 import { isDemoMode } from "./demo";
+import { guessRankOp } from "./cloudApi";
 
 const app = getApp();
 
@@ -11,6 +12,20 @@ const app = getApp();
 export const QUIZ_TOTAL = 10;
 // 选项数量（含正确答案）
 export const OPTION_COUNT = 4;
+
+// 经典模式积分规则
+export const CLASSIC_CORRECT = 10;   // 答对 +10
+export const CLASSIC_WRONG = -3;     // 答错 -3
+export const CLASSIC_BONUS = 20;     // 全对额外 +20
+
+// 计算经典模式积分
+export function computeClassicScore(correctCount, total) {
+  let score = correctCount * CLASSIC_CORRECT + (total - correctCount) * CLASSIC_WRONG;
+  if (correctCount === total) {
+    score += CLASSIC_BONUS;
+  }
+  return score;
+}
 
 // 游戏模式
 export const MODE_CLASSIC = 'classic';   // 经典模式：10 题，答错不中断
@@ -242,8 +257,11 @@ function getBestRecord(mode) {
 // 写入历史最佳记录（仅当更高时更新）
 function saveBestRecord(mode, score) {
   const key = BEST_RECORD_KEY(mode || MODE_CLASSIC);
-  const best = wx.getStorageSync(key) || 0;
-  if (score > best) {
+  const stored = wx.getStorageSync(key);
+  const hasRecord = stored !== undefined && stored !== null && stored !== '';
+  const best = hasRecord ? stored : null;
+  // 首次（无记录）或刷新最佳时更新
+  if (!hasRecord || score > best) {
     wx.setStorageSync(key, score);
     return true;
   }
@@ -267,6 +285,39 @@ function getDemoQuizPool() {
   return pool;
 }
 
+// ===== 排行榜接口 =====
+// 提交成绩到排行榜（仅在刷新最佳时调用）
+async function submitScore(mode, score) {
+  try {
+    return await guessRankOp({ op: 'submit', mode, score });
+  } catch (e) {
+    console.warn('提交猜猫猫排行榜失败（不影响游戏）:', e.message);
+    return { ok: false };
+  }
+}
+
+// 获取排行榜 Top 100
+async function getRankList(mode) {
+  try {
+    const res = await guessRankOp({ op: 'getRank', mode });
+    return res?.rankList || [];
+  } catch (e) {
+    console.warn('获取猜猫猫排行榜失败:', e.message);
+    return [];
+  }
+}
+
+// 获取自己的排名
+async function getMyRank(mode) {
+  try {
+    const res = await guessRankOp({ op: 'getMyRank', mode });
+    return res || { myBest: 0, myRank: 0 };
+  } catch (e) {
+    console.warn('获取猜猫猫排名失败:', e.message);
+    return { myBest: 0, myRank: 0 };
+  }
+}
+
 module.exports = {
   QUIZ_TOTAL,
   OPTION_COUNT,
@@ -274,10 +325,17 @@ module.exports = {
   MODE_ENDLESS,
   MODE_TIMED,
   TIMED_DURATION,
+  CLASSIC_CORRECT,
+  CLASSIC_WRONG,
+  CLASSIC_BONUS,
+  computeClassicScore,
   getQuizPool,
   generateQuestion,
   generateQuiz,
   generateSingleQuestion,
   getBestRecord,
   saveBestRecord,
+  submitScore,
+  getRankList,
+  getMyRank,
 };

@@ -382,6 +382,25 @@
   margin-left: 6rpx;
 }
 
+/* 提交状态 */
+.submit-status {
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.submit-status.submitting {
+  color: var(--color-gray-max);
+}
+
+.submit-status.success {
+  color: var(--color-green-dark);
+}
+
+.submit-status.fail {
+  color: var(--color-gray-max);
+}
+
 /* 按钮 */
 .result-btns {
   margin-top: 50rpx;
@@ -591,6 +610,43 @@
 }
 
 .btn-select:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* 排行榜入口按钮 */
+.select-rank-btn {
+  margin-top: 40rpx;
+  padding: 24rpx 60rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background: #fff;
+  border: 3rpx solid var(--color-primary);
+  border-radius: 44rpx;
+  box-shadow: 0rpx 4rpx 16rpx rgba(255, 209, 1, 0.2);
+}
+
+.select-rank-btn:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+/* 结算页排行榜按钮 */
+.btn-rank {
+  width: 80%;
+  padding: 24rpx 0;
+  text-align: center;
+  font-size: 32rpx;
+  color: var(--color-primary-text);
+  background: var(--color-primary-light);
+  border: 2rpx solid var(--color-primary);
+  border-radius: 44rpx;
+  margin-top: 8rpx;
+}
+
+.btn-rank:active {
   opacity: 0.85;
   transform: scale(0.98);
 }

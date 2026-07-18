@@ -21,9 +21,9 @@
         <view class="mode-best" wx:if="{{item.best > 0}}">🏆 {{item.best}}</view>
       </view>
     </view>
+    <!-- 排行榜入口 -->
+    <view class="select-rank-btn" bindtap="onGoRank">🏆 {{cfg.rank_btn}}</view>
   </view>
-
-  <!-- 加载中 -->
   <view wx:elif="{{phase === 'loading'}}" class="guess-loading">
     <view class="loading-cat">🐱</view>
     <view class="loading-text">{{cfg.loading_tip}}</view>
@@ -115,11 +115,16 @@
       <!-- 最佳记录 -->
       <view wx:if="{{isNewBest}}" class="result-newbest">{{cfg.new_best_tip}}</view>
       <view class="result-best">{{cfg.best_record_tip}}<text class="best-num">{{bestRecord}}</text></view>
+      <!-- 排行榜提交状态 -->
+      <view wx:if="{{submitStatus === 'submitting'}}" class="submit-status submitting">正在上传成绩...</view>
+      <view wx:if="{{submitStatus === 'success'}}" class="submit-status success">✓ 成绩已上传排行榜</view>
+      <view wx:if="{{submitStatus === 'fail'}}" class="submit-status fail">成绩上传失败，下次刷新最佳时重试</view>
     </view>
     <!-- 按钮 -->
     <view class="result-btns">
       <view class="btn-restart" bindtap="onRestart">{{cfg.btn_restart}}</view>
       <view class="btn-select" bindtap="onBackToSelect">{{cfg.btn_back_to_select}}</view>
+      <view class="btn-rank" bindtap="onGoRank">🏆 {{cfg.rank_btn}}</view>
     </view>
   </view>
 

@@ -316,6 +316,17 @@ async function catFace(options) {
   }
 }
 
+// 猜猫猫排行榜操作
+async function guessRankOp(options) {
+  const app = getApp();
+  const openid = await getCurrentUserOpenid();
+  return (await app.mpServerless.function.invoke('unionOp', {
+    ...options,
+    openid: openid,
+    unionAction: "guessRankOp",
+  })).result;
+}
+
 
 module.exports = {
   curdOp,
@@ -342,5 +353,6 @@ module.exports = {
   getURL,
   getTempCOS,
   catFace,
-  getCurrentUserOpenid
+  getCurrentUserOpenid,
+  guessRankOp,
 };
