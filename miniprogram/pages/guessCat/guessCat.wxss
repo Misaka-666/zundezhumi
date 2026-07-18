@@ -424,3 +424,173 @@
   opacity: 0.85;
   transform: scale(0.98);
 }
+
+/* ===== 模式选择页 ===== */
+.guess-select {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100rpx;
+}
+
+.select-title {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: var(--color-black-light);
+  margin-bottom: 16rpx;
+}
+
+.select-subtitle {
+  font-size: 30rpx;
+  color: var(--color-gray-max);
+  margin-bottom: 50rpx;
+}
+
+.mode-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 36rpx 30rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0rpx 8rpx 24rpx var(--color-ltblack-transparent);
+  border: 3rpx solid transparent;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.mode-card:active {
+  transform: scale(0.97);
+  border-color: var(--color-primary);
+  box-shadow: 0rpx 8rpx 30rpx rgba(255, 209, 1, 0.3);
+}
+
+.mode-icon {
+  font-size: 60rpx;
+  margin-right: 28rpx;
+  flex-shrink: 0;
+}
+
+.mode-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-name {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--color-black-light);
+  margin-bottom: 8rpx;
+}
+
+.mode-desc {
+  font-size: 26rpx;
+  color: var(--color-gray-max);
+  line-height: 1.4;
+}
+
+.mode-best {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-primary-text);
+  background: var(--color-primary-light);
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  flex-shrink: 0;
+}
+
+/* ===== 限时模式倒计时 ===== */
+.quiz-progress.time-urgent {
+  color: var(--color-red);
+  animation: timeBlink 0.5s infinite;
+}
+
+@keyframes timeBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.progress-fill.time-urgent {
+  background: linear-gradient(90deg, var(--color-red), var(--color-red-dark));
+}
+
+/* 无限模式连胜渐变条 */
+.endless-fill {
+  background: linear-gradient(90deg, #ff6b35, #ff9500);
+}
+
+/* ===== 无限模式结算：连胜大字 ===== */
+.result-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.streak-num {
+  font-size: 100rpx;
+  font-weight: 700;
+  color: #ff6b35;
+  line-height: 1.1;
+  animation: streakPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes streakPop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.streak-label {
+  font-size: 30rpx;
+  color: var(--color-gray-max);
+  margin-top: 8rpx;
+}
+
+/* ===== 限时模式结算：答对数 ===== */
+.result-timed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.timed-score {
+  font-size: 100rpx;
+  font-weight: 700;
+  color: var(--color-primary-text);
+  line-height: 1.1;
+  animation: streakPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.timed-info {
+  font-size: 28rpx;
+  color: var(--color-gray-max);
+  margin-top: 8rpx;
+}
+
+/* ===== 返回选择页按钮 ===== */
+.btn-select {
+  width: 80%;
+  padding: 28rpx 0;
+  text-align: center;
+  font-size: 34rpx;
+  color: var(--color-black-light);
+  background: #fff;
+  border: 2rpx solid var(--color-gray);
+  border-radius: 44rpx;
+}
+
+.btn-select:active {
+  opacity: 0.85;
+  transform: scale(0.98);
+}

@@ -1,8 +1,30 @@
 <!-- 猜猫猫游戏页 -->
 <view class="guess-page">
 
+  <!-- 模式选择页 -->
+  <view wx:if="{{phase === 'select'}}" class="guess-select">
+    <view class="select-title">🐱 猜猫猫</view>
+    <view class="select-subtitle">选择你的挑战模式</view>
+    <view class="mode-cards">
+      <view
+        wx:for="{{modeList}}"
+        wx:key="key"
+        class="mode-card"
+        bindtap="onSelectMode"
+        data-mode="{{item.key}}"
+      >
+        <view class="mode-icon">{{item.icon}}</view>
+        <view class="mode-info">
+          <view class="mode-name">{{item.name}}</view>
+          <view class="mode-desc">{{item.desc}}</view>
+        </view>
+        <view class="mode-best" wx:if="{{item.best > 0}}">🏆 {{item.best}}</view>
+      </view>
+    </view>
+  </view>
+
   <!-- 加载中 -->
-  <view wx:if="{{phase === 'loading'}}" class="guess-loading">
+  <view wx:elif="{{phase === 'loading'}}" class="guess-loading">
     <view class="loading-cat">🐱</view>
     <view class="loading-text">{{cfg.loading_tip}}</view>
   </view>
@@ -11,20 +33,34 @@
   <view wx:elif="{{phase === 'error'}}" class="guess-error">
     <view class="error-icon">😿</view>
     <view class="error-text">{{errorMsg}}</view>
-    <view class="btn-back" bindtap="onBack">{{cfg.btn_back}}</view>
+    <view class="btn-back" bindtap="onBackToSelect">{{cfg.btn_back_to_select}}</view>
   </view>
 
   <!-- 答题中 -->
   <view wx:elif="{{phase === 'playing'}}" class="guess-playing">
-    <!-- 顶部进度 -->
+    <!-- 顶部信息栏 -->
     <view class="quiz-header">
-      <view class="quiz-progress">{{cfg.progress_tip}}{{currentIndex + 1}}/{{total}}</view>
+      <!-- 经典/无限模式：显示进度或连胜 -->
+      <block wx:if="{{mode === 'classic'}}">
+        <view class="quiz-progress">{{cfg.progress_tip}}{{currentIndex + 1}}/{{total}}</view>
+      </block>
+      <block wx:elif="{{mode === 'endless'}}">
+        <view class="quiz-progress">🔥 {{cfg.streak_tip}}{{score}}</view>
+      </block>
+      <block wx:elif="{{mode === 'timed'}}">
+        <view class="quiz-progress{{timeLeft <= 10 ? ' time-urgent' : ''}}">⏱️ {{timeLeft}}s</view>
+      </block>
       <view class="quiz-score">{{cfg.score_tip}}<text class="score-num">{{score}}</text></view>
     </view>
 
-    <!-- 进度条 -->
+    <!-- 进度条 / 倒计时条 -->
     <view class="progress-bar">
-      <view class="progress-fill" style="width: {{(currentIndex + (answered ? 1 : 0)) * 100 / total}}%;"></view>
+      <!-- 经典模式：题目进度条 -->
+      <view wx:if="{{mode === 'classic'}}" class="progress-fill" style="width: {{(currentIndex + (answered ? 1 : 0)) * 100 / total}}%;"></view>
+      <!-- 限时模式：时间倒计时条 -->
+      <view wx:elif="{{mode === 'timed'}}" class="progress-fill{{timeLeft <= 10 ? ' time-urgent' : ''}}" style="width: {{timeLeft * 100 / total}}%;"></view>
+      <!-- 无限模式：无进度条，用连胜渐变条 -->
+      <view wx:elif="{{mode === 'endless'}}" class="progress-fill endless-fill" style="width: {{score >= 20 ? 100 : score * 5}}%;"></view>
     </view>
 
     <!-- 猫咪照片 —— 揭晓卡片 -->
@@ -53,8 +89,8 @@
   <!-- 结算页 —— 成绩卡片 -->
   <view wx:elif="{{phase === 'result'}}" class="guess-result">
     <view class="result-card">
-      <!-- 环形进度 -->
-      <view class="result-ring">
+      <!-- 经典模式：环形进度 -->
+      <view wx:if="{{mode === 'classic'}}" class="result-ring">
         <view class="ring-bg"></view>
         <view class="ring-fill" style="background: conic-gradient(var(--color-primary) {{total > 0 ? score * 360 / total : 0}}deg, var(--color-gray-normal) 0deg);"></view>
         <view class="ring-center">
@@ -62,6 +98,17 @@
           <text class="ring-total">/{{total}}</text>
         </view>
       </view>
+      <!-- 无限模式：连胜数大字 -->
+      <view wx:elif="{{mode === 'endless'}}" class="result-streak">
+        <text class="streak-num">{{score}}</text>
+        <text class="streak-label">{{cfg.streak_label}}</text>
+      </view>
+      <!-- 限时模式：答对/答题数 -->
+      <view wx:elif="{{mode === 'timed'}}" class="result-timed">
+        <view class="timed-score">{{score}}</view>
+        <view class="timed-info">{{cfg.correct_tip}} {{score}} / {{answeredCount}} {{cfg.answered_tip}}</view>
+      </view>
+
       <!-- 评级 -->
       <view class="result-rank">{{resultRank.emoji}} {{resultRank.title}}</view>
       <view class="result-rank-desc">{{resultRank.desc}}</view>
@@ -72,7 +119,7 @@
     <!-- 按钮 -->
     <view class="result-btns">
       <view class="btn-restart" bindtap="onRestart">{{cfg.btn_restart}}</view>
-      <view class="btn-back" bindtap="onBack">{{cfg.btn_back}}</view>
+      <view class="btn-select" bindtap="onBackToSelect">{{cfg.btn_back_to_select}}</view>
     </view>
   </view>
 

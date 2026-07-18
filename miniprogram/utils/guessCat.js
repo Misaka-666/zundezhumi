@@ -7,13 +7,23 @@ import { isDemoMode } from "./demo";
 
 const app = getApp();
 
-// 每局题数
+// 每局题数（经典模式）
 export const QUIZ_TOTAL = 10;
 // 选项数量（含正确答案）
 export const OPTION_COUNT = 4;
 
+// 游戏模式
+export const MODE_CLASSIC = 'classic';   // 经典模式：10 题，答错不中断
+export const MODE_ENDLESS = 'endless';   // 无限模式：答错即结束，统计连胜
+export const MODE_TIMED = 'timed';       // 限时模式：60 秒内尽可能多答题
+
+// 限时模式时长（秒）
+export const TIMED_DURATION = 60;
+
 // 缓存键
 const CACHE_KEY_QUIZ_POOL = 'guess-cat-quiz-pool';
+// 各模式最佳记录的 storage key 前缀
+const BEST_RECORD_KEY = (mode) => `guess-cat-best-${mode}`;
 
 // 获取可出题的猫 + 照片池
 // 返回 [{ catId, name, photos: [photo...] }, ...]
@@ -190,16 +200,51 @@ async function generateQuiz() {
   return questions.length > 0 ? questions : null;
 }
 
-// 读取历史最佳记录
-function getBestRecord() {
-  return wx.getStorageSync('guess-cat-best') || 0;
+// 逐题生成单道题目（含照片签名）—— 供无限/限时模式按需出题
+// excludeCatId: 避免连续重复同一只猫（可选）
+// 返回 question 对象或 null
+async function generateSingleQuestion(excludeCatId) {
+  const pool = await getQuizPool();
+  if (!pool || pool.length < OPTION_COUNT) {
+    return null;
+  }
+
+  // 连续去重 + 回退逻辑（与 generateQuiz 一致）
+  let availPool = pool;
+  let useFallback = false;
+  if (pool.length > OPTION_COUNT && excludeCatId) {
+    availPool = pool.filter(c => c.catId !== excludeCatId);
+    if (availPool.length < OPTION_COUNT) {
+      availPool = pool;
+    } else {
+      useFallback = true;
+    }
+  }
+
+  let q = generateQuestion(availPool);
+  if (!q && useFallback) {
+    q = generateQuestion(pool);
+  }
+  if (!q) return null;
+
+  q.photoUrl = await pickAndSignPhoto(q.photos);
+  delete q.photos;
+  if (!q.photoUrl) return null;
+
+  return q;
+}
+
+// 读取历史最佳记录（按模式区分）
+function getBestRecord(mode) {
+  return wx.getStorageSync(BEST_RECORD_KEY(mode || MODE_CLASSIC)) || 0;
 }
 
 // 写入历史最佳记录（仅当更高时更新）
-function saveBestRecord(score) {
-  const best = getBestRecord();
+function saveBestRecord(mode, score) {
+  const key = BEST_RECORD_KEY(mode || MODE_CLASSIC);
+  const best = wx.getStorageSync(key) || 0;
   if (score > best) {
-    wx.setStorageSync('guess-cat-best', score);
+    wx.setStorageSync(key, score);
     return true;
   }
   return false;
@@ -225,9 +270,14 @@ function getDemoQuizPool() {
 module.exports = {
   QUIZ_TOTAL,
   OPTION_COUNT,
+  MODE_CLASSIC,
+  MODE_ENDLESS,
+  MODE_TIMED,
+  TIMED_DURATION,
   getQuizPool,
   generateQuestion,
   generateQuiz,
+  generateSingleQuestion,
   getBestRecord,
   saveBestRecord,
 };
