@@ -9,10 +9,9 @@
 /* Tab */
 .rank-tabs {
   display: flex;
+  flex-shrink: 0;
   background: #fff;
   box-shadow: 0rpx 4rpx 12rpx var(--color-ltblack-transparent);
-  position: sticky;
-  top: 0;
   z-index: 10;
 }
 
@@ -35,10 +34,11 @@
 
 /* 加载 */
 .rank-loading {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 200rpx;
+  justify-content: center;
 }
 
 .loading-cat {
@@ -144,10 +144,11 @@
 
 /* 空榜 */
 .rank-empty {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 200rpx;
+  justify-content: center;
 }
 
 .empty-icon {
@@ -161,8 +162,9 @@
   text-align: center;
 }
 
-/* 底部我的排名（组件内非 fixed，随 scroll 区滚动） */
+/* 底部我的排名（组件内非 fixed，随 flex 布局固定在底部） */
 .rank-footer {
+  flex-shrink: 0;
   background: #fff;
   padding: 20rpx 30rpx;
   box-shadow: 0rpx -4rpx 16rpx var(--color-ltblack-transparent);
