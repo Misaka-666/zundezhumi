@@ -289,13 +289,16 @@ function getDemoQuizPool() {
 async function _guessRankOp(options) {
   try {
     const openid = await _getCurrentUserOpenid();
-    return (await app.mpServerless.function.invoke('unionOp', {
+    console.log('[猜猫猫] _guessRankOp:', JSON.stringify(options), 'openid:', openid ? '有' : '无');
+    const res = await app.mpServerless.function.invoke('unionOp', {
       ...options,
       openid: openid,
       unionAction: "guessRankOp",
-    })).result;
+    });
+    console.log('[猜猫猫] 云函数返回:', JSON.stringify(res?.result));
+    return res?.result;
   } catch (e) {
-    console.warn('guessRankOp 调用失败:', e.message);
+    console.warn('[猜猫猫] _guessRankOp 异常:', e.message);
     return null;
   }
 }
