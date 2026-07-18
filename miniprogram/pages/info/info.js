@@ -119,12 +119,8 @@ Page({
           {
             name: "人员管理",
             path: "/pages/manage/managers/managers",
+            num: "numMapAccessApps",
             icon: "icon-manager-o"
-          },
-          {
-            name: "特邀用户",
-            path: "/pages/tools/inviteUser/inviteUser",
-            icon: "icon-star-o"
           },
           {
             name: "徽章管理",
@@ -239,11 +235,13 @@ Page({
     const { result: numChkComments } = await app.mpServerless.db.collection('comment').count({ needVerify: true });
     const { result: numFeedbacks } = await app.mpServerless.db.collection('feedback').count({ dealed: false });
     const { result: numImProcess } = await app.mpServerless.db.collection('photo').count(imProcessQf);
+    const { result: numMapAccessApps } = await app.mpServerless.db.collection('user').count({ 'mapAccess.status': 'pending' });
     this.setData({
       "nums.numChkPhotos": numChkPhotos,
       "nums.numChkComments": numChkComments,
       "nums.numFeedbacks": numFeedbacks,
       "nums.numImProcess": numImProcess,
+      "nums.numMapAccessApps": numMapAccessApps,
       "showCond.manager": true,
     });
   },

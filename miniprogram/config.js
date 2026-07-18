@@ -12,14 +12,21 @@ module.exports = {
   // EMAS空间ID
   space_id: "mp-951b4017-fbbc-4356-a250-08406c5188ff",
   // 服务空间 secret key
-  space_secret: require('./appSecret').space_secret,
+  space_secret: (() => { try { return require('./appSecret').space_secret; } catch(e) { return ''; } })(),
   // 服务空间地址Api Endpoint
   space_endpoint: "https://api.next.bspapp.com",
   use_private_tencent_cos: true,
   // 私有的腾讯云cos签名过期时间（秒）
   sign_expires_tencent_cos: 3600 * 2,
   // 图片选择数量限制
-  chooseMediaCount: 20, 
+  chooseMediaCount: 20,
+  // 喵地图配置的大本营坐标，默认地图中心
+  map_center: { latitude: 23.1026, longitude: 113.2996 },
+  map_max_markers: 200,
+  // 喵地图申请——达到此数量即可申请（未达到的也可以提交，但是会有警示标识）
+  mapAccessMinRequired: 10,
+  // 喵地图申请——达到此数量自动通过
+  mapAccessAutoPassCount: 60, 
 
   // 科普页图片
   science_imgs: [

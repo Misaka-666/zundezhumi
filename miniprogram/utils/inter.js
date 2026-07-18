@@ -14,7 +14,7 @@ async function ensureUser() {
 }
 
 // 定义数据库常量：
-const TYPE_LIKE = 10000;
+const TYPE_LIKE = 10000;    // 点赞
 
 // 获取缓存key
 function _getLikeCacheKey(item_id) {

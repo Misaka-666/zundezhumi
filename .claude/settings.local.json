@@ -12,7 +12,12 @@
       "Agent(*)",
       "TaskCreate(*)",
       "TaskUpdate(*)",
-      "AskUserQuestion(*)"
+      "AskUserQuestion(*)",
+      "Bash(cp \".claude/settings.local.json\" /tmp/settings_local_backup.json)",
+      "Bash(git reset *)",
+      "Bash(cp /tmp/settings_local_backup.json \".claude/settings.local.json\")",
+      "Bash(git checkout *)",
+      "WebFetch(domain:developers.weixin.qq.com)"
     ]
   },
   "statusLine": {

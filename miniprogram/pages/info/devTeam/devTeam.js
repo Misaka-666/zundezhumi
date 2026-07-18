@@ -10,6 +10,45 @@ Page({
     text_cfg: text_cfg,
     github_link: "https://github.com/sysucats/zhongdamaopu",
     update_log: [{
+      version: "v1.19.5",
+      content: [
+        "首页样式更新",
+        "喵地图问题修复",
+      ],
+      time: "2026/06/26"
+    }, {
+      version: "v1.19.4",
+      content: [
+        "迁移识猫到EMAS",
+      ],
+      time: "2026/06/21"
+    }, {
+      version: "v1.19.3",
+      content: [
+        "重构地图定位数据结构",
+      ],
+      time: "2026/06/20"
+    }, {
+      version: "v1.19.2",
+      content: [
+        "更新地图定位方式",
+      ],
+      time: "2026/06/18"
+    }, {
+      version: "v1.19.1",
+      content: [
+        "喵地图审核及使用优化",
+      ],
+      time: "2026/06/08"
+    }, {
+      version: "v1.19.0",
+      content: [
+        "新增喵地图功能（感谢NakanoYuhao）",
+        "修复个性化部署脚本（感谢A-n-k-a）",
+        "一些安全修复",
+      ],
+      time: "2026/06/06"
+    }, {
       version: "v1.18.5",
       content: [
         "合并后端云函数",

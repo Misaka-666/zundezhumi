@@ -11,7 +11,6 @@ function getDate(date) {
 async function getCurrentUserOpenid() {
   try {
     const app = getApp();
-    console.log("App instance:", app);
     const res = await app.mpServerless.user.getInfo({
       authProvider: 'wechat_openapi'
     });
@@ -290,6 +289,25 @@ async function getTempCOS(options) {
   })).result;
 }
 
+// 识别猫脸
+// 图片识别是耗时操作，SDK transport 默认 timeout 仅 5s 不够用，
+// 这里临时调大到 30s，调用结束恢复原值，避免影响其他云函数调用。
+async function catFace(options) {
+  const app = getApp();
+  const openid = await getCurrentUserOpenid();
+  const transport = app.mpServerless.transport;
+  const oldTimeout = transport.timeoutOption;
+  transport.setTimeout(30000);
+  try {
+    return (await app.mpServerless.function.invoke('catFace', {
+      ...options,
+      openid: openid,
+    })).result;
+  } finally {
+    transport.setTimeout(oldTimeout);
+  }
+}
+
 
 module.exports = {
   curdOp,
@@ -315,5 +333,6 @@ module.exports = {
   initVaccineTypes,
   getURL,
   getTempCOS,
+  catFace,
   getCurrentUserOpenid
 };
