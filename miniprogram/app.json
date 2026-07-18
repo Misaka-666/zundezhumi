@@ -96,9 +96,6 @@
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents",
   "permission": {
-    "scope.userLocation": {
-      "desc": "用于记录猫咪照片的拍摄位置，在地图上展示猫咪分布"
-    },
     "scope.userFuzzyLocation": {
       "desc": "用于记录猫咪照片的拍摄位置，在地图上展示猫咪分布"
     }
