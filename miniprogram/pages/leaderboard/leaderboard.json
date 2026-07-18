@@ -2,7 +2,8 @@
   "usingComponents": {
     "heart": "/packages/heart-button/heart",
     "photoRank": "/components/photoRank/photoRank",
-    "badgeRank": "/components/badgeRank/badgeRank"
+    "badgeRank": "/components/badgeRank/badgeRank",
+    "guessRankTab": "/components/guessRankTab/guessRankTab"
   },
   "disableScroll": true,
   "navigationBarTitleText": "榜单"

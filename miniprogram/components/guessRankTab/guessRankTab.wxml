@@ -1,0 +1,59 @@
+<!-- 猜猫猫排行榜组件 -->
+<view class="rank-page">
+  <!-- Tab 切换 -->
+  <view class="rank-tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="rank-tab {{activeTab === index ? 'active' : ''}}"
+      bindtap="onSwitchTab"
+      data-idx="{{index}}"
+    >{{item.name}}</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="rank-loading">
+    <view class="loading-cat">🐱</view>
+    <view class="loading-text">{{cfg.rank_loading_tip}}</view>
+  </view>
+
+  <!-- 排行榜列表 -->
+  <block wx:elif="{{rankList.length > 0}}">
+    <scroll-view scroll-y class="rank-scroll">
+      <view
+        wx:for="{{rankList}}"
+        wx:key="_openid"
+        class="rank-item {{index < 3 ? 'top-' + (index + 1) : ''}}"
+      >
+        <view class="rank-num">{{index + 1}}</view>
+        <image class="rank-avatar" src="{{item.userInfo.avatarUrl || '/pages/public/images/system/user.png'}}" mode="aspectFill"></image>
+        <view class="rank-name">{{item.userInfo.nickName || '猫友'}}</view>
+        <view class="rank-score">{{item.score}}<text class="rank-unit">{{tabs[activeTab].unit}}</text></view>
+        <view class="rank-play-count" wx:if="{{activeTab === 0}}">{{item.playCount || 0}}局</view>
+      </view>
+      <view style="height: 120rpx;"></view>
+    </scroll-view>
+  </block>
+
+  <!-- 空榜 -->
+  <view wx:else class="rank-empty">
+    <view class="empty-icon">🐾</view>
+    <view class="empty-text">{{cfg.no_rank_tip}}</view>
+  </view>
+
+  <!-- 底部我的排名 -->
+  <view class="rank-footer">
+    <view wx:if="{{myRank > 0}}" class="my-rank">
+      <text class="my-rank-label">{{cfg.my_rank_tip}}</text>
+      <text class="my-rank-num">第{{myRank}}名</text>
+      <text class="my-rank-best">| {{cfg.best_record_tip}}{{myBest}}{{tabs[activeTab].unit}}</text>
+      <text class="my-rank-play" wx:if="{{activeTab === 0}}">| {{myPlayCount || 0}}局</text>
+    </view>
+    <view wx:elif="{{myBest > 0}}" class="my-rank">
+      <text class="my-rank-label">{{cfg.best_record_tip}}{{myBest}}{{tabs[activeTab].unit}}（未进入榜单）{{activeTab === 0 ? ' | ' + (myPlayCount || 0) + '局' : ''}}</text>
+    </view>
+    <view wx:else class="my-rank">
+      <text class="my-rank-label">{{cfg.no_my_rank_tip}}</text>
+    </view>
+  </view>
+</view>

@@ -74,6 +74,13 @@
     </scroll-view>
   </swiper-item><!-- 拍照月榜 end -->
 
+  <!-- 猜猫榜 -->
+  <swiper-item>
+    <scroll-view scroll-y="1" style="height: 100%;">
+      <guessRankTab id="guess-rank"></guessRankTab>
+    </scroll-view>
+  </swiper-item><!-- 猜猫榜 end -->
+
 </swiper>
 
 <!-- 底tab占位 -->
