@@ -109,25 +109,25 @@ module.exports = async (ctx) => {
         const seen = new Map();
         const playCountMap = new Map(); // 无限/限时模式用：统计每用户记录数
         const classicTotalMap = new Map(); // 经典模式用：累加多条脏数据求总分
+        const classicPlayMap = new Map(); // 经典模式用：累加 playCount（与 getMyRank 一致）
         for (const r of (records || [])) {
-            // 统计游玩次数（无限/限时模式按记录数）
-            playCountMap.set(r._openid, (playCountMap.get(r._openid) || 0) + 1);
             if (isClassic) {
-                // 经典模式：累加同一用户所有记录的 score（兼容历史脏数据）
+                // 经典模式：累加 score 和 playCount（兼容脏数据，与 getMyRank 保持一致）
                 classicTotalMap.set(r._openid, (classicTotalMap.get(r._openid) || 0) + (r.score || 0));
+                classicPlayMap.set(r._openid, (classicPlayMap.get(r._openid) || 0) + (r.playCount || 1));
                 // 取最新日期作为排序依据
                 if (!seen.has(r._openid) || new Date(r.date) > new Date(seen.get(r._openid).date)) {
                     seen.set(r._openid, r);
                 }
             } else {
                 // 无限/限时：取单局最高
+                playCountMap.set(r._openid, (playCountMap.get(r._openid) || 0) + 1);
                 if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
                     seen.set(r._openid, r);
                 }
             }
         }
         const rankList = Array.from(seen.values()).sort((a, b) => {
-            // 经典模式按累加总分排序，无限/限时按单局最高排序
             const aScore = isClassic ? classicTotalMap.get(a._openid) : a.score;
             const bScore = isClassic ? classicTotalMap.get(b._openid) : b.score;
             if (bScore !== aScore) return bScore - aScore;
@@ -135,7 +135,7 @@ module.exports = async (ctx) => {
         }).slice(0, 100).map(r => ({
             _openid: r._openid,
             score: isClassic ? classicTotalMap.get(r._openid) : r.score,
-            playCount: isClassic ? (r.playCount || 1) : (playCountMap.get(r._openid) || 1)
+            playCount: isClassic ? (classicPlayMap.get(r._openid) || 1) : (playCountMap.get(r._openid) || 1)
         }));
         return { ok: true, rankList: rankList };
     }
