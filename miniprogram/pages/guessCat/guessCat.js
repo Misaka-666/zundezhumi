@@ -4,7 +4,6 @@ import {
   MODE_CLASSIC, MODE_ENDLESS, MODE_TIMED,
   TIMED_DURATION,
   CLASSIC_CORRECT, CLASSIC_WRONG, CLASSIC_BONUS,
-  computeClassicScore,
   getBestRecord, saveBestRecord,
   submitScore,
 } from "../../utils/guessCat";
