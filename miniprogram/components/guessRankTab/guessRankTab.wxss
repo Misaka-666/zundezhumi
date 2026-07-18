@@ -60,7 +60,7 @@
 /* 列表 */
 .rank-scroll {
   flex: 1;
-  height: calc(100vh - 240rpx - 35px - 56rpx - 100rpx);
+  min-height: 0;
 }
 
 .rank-item {
