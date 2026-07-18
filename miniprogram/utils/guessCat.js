@@ -4,7 +4,6 @@ import { getCatItemMulti } from "./cat";
 import { shuffle, randomInt } from "./utils";
 import { getCacheItem, setCacheItem, cacheTime } from "./cache";
 import { isDemoMode } from "./demo";
-import { guessRankOp } from "./cloudApi";
 
 const app = getApp();
 
@@ -286,10 +285,40 @@ function getDemoQuizPool() {
 }
 
 // ===== 排行榜接口 =====
+// 内联云函数调用，避免引入 cloudApi 模块依赖
+async function _guessRankOp(options) {
+  try {
+    const openid = await _getCurrentUserOpenid();
+    return (await app.mpServerless.function.invoke('unionOp', {
+      ...options,
+      openid: openid,
+      unionAction: "guessRankOp",
+    })).result;
+  } catch (e) {
+    console.warn('guessRankOp 调用失败:', e.message);
+    return null;
+  }
+}
+
+async function _getCurrentUserOpenid() {
+  try {
+    const res = await app.mpServerless.user.getInfo({
+      authProvider: 'wechat_openapi'
+    });
+    if (res.success) {
+      return res.result.user.oAuthUserId;
+    }
+    return null;
+  } catch (e) {
+    console.warn('getCurrentUserOpenid error:', e.message);
+    return null;
+  }
+}
+
 // 提交成绩到排行榜（仅在刷新最佳时调用）
 async function submitScore(mode, score) {
   try {
-    return await guessRankOp({ op: 'submit', mode, score });
+    return await _guessRankOp({ op: 'submit', mode, score });
   } catch (e) {
     console.warn('提交猜猫猫排行榜失败（不影响游戏）:', e.message);
     return { ok: false };
@@ -299,7 +328,7 @@ async function submitScore(mode, score) {
 // 获取排行榜 Top 100
 async function getRankList(mode) {
   try {
-    const res = await guessRankOp({ op: 'getRank', mode });
+    const res = await _guessRankOp({ op: 'getRank', mode });
     return res?.rankList || [];
   } catch (e) {
     console.warn('获取猜猫猫排行榜失败:', e.message);
@@ -310,7 +339,7 @@ async function getRankList(mode) {
 // 获取自己的排名
 async function getMyRank(mode) {
   try {
-    const res = await guessRankOp({ op: 'getMyRank', mode });
+    const res = await _guessRankOp({ op: 'getMyRank', mode });
     return res || { myBest: 0, myRank: 0 };
   } catch (e) {
     console.warn('获取猜猫猫排名失败:', e.message);
