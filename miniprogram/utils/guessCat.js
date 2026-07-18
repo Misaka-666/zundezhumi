@@ -340,10 +340,10 @@ async function getRankList(mode) {
 async function getMyRank(mode) {
   try {
     const res = await _guessRankOp({ op: 'getMyRank', mode });
-    return res || { myBest: 0, myRank: 0 };
+    return res || { myBest: 0, myRank: 0, myPlayCount: 0 };
   } catch (e) {
     console.warn('获取猜猫猫排名失败:', e.message);
-    return { myBest: 0, myRank: 0 };
+    return { myBest: 0, myRank: 0, myPlayCount: 0 };
   }
 }
 

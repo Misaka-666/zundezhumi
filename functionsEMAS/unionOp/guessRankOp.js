@@ -89,12 +89,16 @@ module.exports = async (ctx) => {
             }
         } else {
             // 无限/限时模式：每次插入新记录（单局成绩），playCount 在查询时按记录数统计
-            await coll.insertOne({
-                _openid: openid,
-                mode: mode,
-                score: score,
-                date: new Date(),
-            });
+            try {
+                await coll.insertOne({
+                    _openid: openid,
+                    mode: mode,
+                    score: score,
+                    date: new Date(),
+                });
+            } catch (insertErr) {
+                return { ok: false, errMsg: 'insert failed: ' + (insertErr.message || 'unknown') };
+            }
         }
         return { ok: true };
     }

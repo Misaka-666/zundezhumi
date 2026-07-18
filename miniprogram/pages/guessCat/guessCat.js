@@ -117,7 +117,6 @@ Page({
           this.setData({ phase: "error", errorMsg: this.data.cfg.error_not_enough });
           return;
         }
-        this.questions = [q];
         this.setData({
           phase: "playing",
           total: mode === MODE_TIMED ? TIMED_DURATION : 0,
@@ -299,7 +298,8 @@ Page({
     if (submitMsg === 'success') {
       wx.showToast({ title: '成绩已上传', icon: 'success', duration: 2000 });
     } else {
-      wx.showModal({ title: '上传失败', content: submitMsg, showCancel: false });
+      console.warn('猜猫猫成绩上传失败:', submitMsg);
+      wx.showToast({ title: '成绩上传失败，稍后重试', icon: 'none', duration: 2000 });
     }
   },
 
