@@ -315,7 +315,7 @@ async function _getCurrentUserOpenid() {
   }
 }
 
-// 提交成绩到排行榜（仅在刷新最佳时调用）
+// 提交成绩到排行榜（每局都提交）
 async function submitScore(mode, score) {
   try {
     return await _guessRankOp({ op: 'submit', mode, score });

@@ -35,7 +35,7 @@ module.exports = async (ctx) => {
     // 提交成绩
     if (op === 'submit') {
         const score = ctx.args?.score;
-        if (score == null || typeof score !== 'number') {
+        if (score == null || !Number.isFinite(score)) {
             return { ok: false, errMsg: 'invalid score' };
         }
         const bounds = scoreBounds[mode];
@@ -49,12 +49,16 @@ module.exports = async (ctx) => {
             try {
                 await coll.findOneAndUpdate(
                     { _openid: openid, mode: mode },
-                    { $inc: { score: score, playCount: 1 }, $set: { lastUpdate: new Date() } },
-                    { upsert: true, set: { _openid: openid, mode: mode, score: score, playCount: 1, date: new Date(), lastUpdate: new Date() } }
+                    {
+                        $inc: { score: score, playCount: 1 },
+                        $set: { lastUpdate: new Date() },
+                        $setOnInsert: { _openid: openid, mode: mode, date: new Date() }
+                    },
+                    { upsert: true }
                 );
             } catch (e) {
                 // EMAS findOneAndUpdate 不支持 upsert 时，回退到非原子方案
-                // 查找→更新或插入（加了错误处理防崩溃）
+                // 查找→更新或插入（insertOne 失败时重试 updateOne 防并发重复）
                 const existing = await coll.find(
                     { _openid: openid, mode: mode },
                     { limit: 1, projection: { score: 1 } }
@@ -65,14 +69,22 @@ module.exports = async (ctx) => {
                         { $inc: { score: score, playCount: 1 }, $set: { lastUpdate: new Date() } }
                     );
                 } else {
-                    await coll.insertOne({
-                        _openid: openid,
-                        mode: mode,
-                        score: score,
-                        playCount: 1,
-                        date: new Date(),
-                        lastUpdate: new Date(),
-                    });
+                    try {
+                        await coll.insertOne({
+                            _openid: openid,
+                            mode: mode,
+                            score: score,
+                            playCount: 1,
+                            date: new Date(),
+                            lastUpdate: new Date(),
+                        });
+                    } catch (insertErr) {
+                        // 并发时另一请求可能已插入，回退到累加
+                        await coll.updateOne(
+                            { _openid: openid, mode: mode },
+                            { $inc: { score: score, playCount: 1 }, $set: { lastUpdate: new Date() } }
+                        );
+                    }
                 }
             }
         } else {
@@ -99,16 +111,9 @@ module.exports = async (ctx) => {
         for (const r of (records || [])) {
             // 统计游玩次数（无限/限时模式按记录数）
             playCountMap.set(r._openid, (playCountMap.get(r._openid) || 0) + 1);
-            if (isClassic) {
-                // 经典模式：取累加后最高的那条（playCount 直接从字段取）
-                if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
-                    seen.set(r._openid, r);
-                }
-            } else {
-                // 无限/限时：取单局最高
-                if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
-                    seen.set(r._openid, r);
-                }
+            // 两种模式去重逻辑一致：取最高分
+            if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
+                seen.set(r._openid, r);
             }
         }
         const rankList = Array.from(seen.values()).sort((a, b) => {
