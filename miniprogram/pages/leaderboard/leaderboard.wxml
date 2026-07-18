@@ -76,9 +76,7 @@
 
   <!-- 猜猫榜 -->
   <swiper-item>
-    <scroll-view scroll-y="1" style="height: 100%;">
-      <guessRankTab id="guess-rank"></guessRankTab>
-    </scroll-view>
+    <guessRankTab id="guess-rank"></guessRankTab>
   </swiper-item><!-- 猜猫榜 end -->
 
 </swiper>
