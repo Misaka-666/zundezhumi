@@ -29,6 +29,7 @@
         <image class="rank-avatar" src="{{item.userInfo.avatarUrl || '/pages/public/images/system/user.png'}}" mode="aspectFill"></image>
         <view class="rank-name">{{item.userInfo.nickName || '猫友'}}</view>
         <view class="rank-score">{{item.score}}<text class="rank-unit">{{tabs[activeTab].unit}}</text></view>
+        <view class="rank-play-count">{{item.playCount || 0}}局</view>
       </view>
       <view style="height: 120rpx;"></view>
     </scroll-view>
@@ -46,9 +47,10 @@
       <text class="my-rank-label">{{cfg.my_rank_tip}}</text>
       <text class="my-rank-num">第{{myRank}}名</text>
       <text class="my-rank-best">| {{cfg.best_record_tip}}{{myBest}}{{tabs[activeTab].unit}}</text>
+      <text class="my-rank-play">| {{myPlayCount || 0}}局</text>
     </view>
     <view wx:elif="{{myBest > 0}}" class="my-rank">
-      <text class="my-rank-label">{{cfg.best_record_tip}}{{myBest}}{{tabs[activeTab].unit}}（未进入榜单）</text>
+      <text class="my-rank-label">{{cfg.best_record_tip}}{{myBest}}{{tabs[activeTab].unit}}（未进入榜单） | {{myPlayCount || 0}}局</text>
     </view>
     <view wx:else class="my-rank">
       <text class="my-rank-label">{{cfg.no_my_rank_tip}}</text>

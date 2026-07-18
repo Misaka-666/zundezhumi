@@ -135,6 +135,13 @@
   margin-left: 4rpx;
 }
 
+.rank-play-count {
+  font-size: 22rpx;
+  color: var(--color-gray-max);
+  margin-left: 12rpx;
+  white-space: nowrap;
+}
+
 /* 空榜 */
 .rank-empty {
   display: flex;
@@ -186,5 +193,9 @@
 }
 
 .my-rank-best {
+  color: var(--color-gray);
+}
+
+.my-rank-play {
   color: var(--color-gray-max);
 }

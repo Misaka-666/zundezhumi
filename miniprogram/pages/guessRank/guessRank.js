@@ -17,6 +17,7 @@ Page({
     rankList: [],
     myRank: 0,
     myBest: 0,
+    myPlayCount: 0,
     loading: true,
   },
 
@@ -40,6 +41,7 @@ Page({
         rankList: items,
         myRank: myRankInfo.myRank || 0,
         myBest: myRankInfo.myBest || 0,
+        myPlayCount: myRankInfo.myPlayCount || 0,
         loading: false,
       });
     } catch (e) {

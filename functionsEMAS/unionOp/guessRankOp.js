@@ -49,8 +49,8 @@ module.exports = async (ctx) => {
             try {
                 await coll.findOneAndUpdate(
                     { _openid: openid, mode: mode },
-                    { $inc: { score: score }, $set: { lastUpdate: new Date() } },
-                    { upsert: true, set: { _openid: openid, mode: mode, score: score, date: new Date(), lastUpdate: new Date() } }
+                    { $inc: { score: score, playCount: 1 }, $set: { lastUpdate: new Date() } },
+                    { upsert: true, set: { _openid: openid, mode: mode, score: score, playCount: 1, date: new Date(), lastUpdate: new Date() } }
                 );
             } catch (e) {
                 // EMAS findOneAndUpdate 不支持 upsert 时，回退到非原子方案
@@ -62,20 +62,21 @@ module.exports = async (ctx) => {
                 if (existing && existing.result && existing.result.length > 0) {
                     await coll.updateOne(
                         { _openid: openid, mode: mode },
-                        { $inc: { score: score }, $set: { lastUpdate: new Date() } }
+                        { $inc: { score: score, playCount: 1 }, $set: { lastUpdate: new Date() } }
                     );
                 } else {
                     await coll.insertOne({
                         _openid: openid,
                         mode: mode,
                         score: score,
+                        playCount: 1,
                         date: new Date(),
                         lastUpdate: new Date(),
                     });
                 }
             }
         } else {
-            // 无限/限时模式：每次插入新记录（单局成绩）
+            // 无限/限时模式：每次插入新记录（单局成绩），playCount 在查询时按记录数统计
             await coll.insertOne({
                 _openid: openid,
                 mode: mode,
@@ -91,12 +92,15 @@ module.exports = async (ctx) => {
         // 两种模式都查 500 条再按 _openid 去重，兜底防重复记录
         const { result: records } = await coll.find(
             { mode: mode },
-            { sort: { score: -1, date: 1 }, limit: 500, projection: { _openid: 1, score: 1, date: 1 } }
+            { sort: { score: -1, date: 1 }, limit: 500, projection: { _openid: 1, score: 1, date: 1, playCount: 1 } }
         );
         const seen = new Map();
+        const playCountMap = new Map(); // 无限/限时模式用：统计每用户记录数
         for (const r of (records || [])) {
+            // 统计游玩次数（无限/限时模式按记录数）
+            playCountMap.set(r._openid, (playCountMap.get(r._openid) || 0) + 1);
             if (isClassic) {
-                // 经典模式：取累加后最高的那条（兼容历史脏数据）
+                // 经典模式：取累加后最高的那条（playCount 直接从字段取）
                 if (!seen.has(r._openid) || r.score > seen.get(r._openid).score) {
                     seen.set(r._openid, r);
                 }
@@ -110,7 +114,11 @@ module.exports = async (ctx) => {
         const rankList = Array.from(seen.values()).sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return new Date(a.date) - new Date(b.date);
-        }).slice(0, 100).map(r => ({ _openid: r._openid, score: r.score }));
+        }).slice(0, 100).map(r => ({
+            _openid: r._openid,
+            score: r.score,
+            playCount: isClassic ? (r.playCount || 1) : (playCountMap.get(r._openid) || 1)
+        }));
         return { ok: true, rankList: rankList };
     }
 
@@ -119,12 +127,20 @@ module.exports = async (ctx) => {
         // 统一用 find 查自己的记录，取最高分（兼容多条脏数据）
         const { result: myRecords } = await coll.find(
             { mode: mode, _openid: openid },
-            { sort: { score: -1 }, limit: 1, projection: { score: 1, date: 1 } }
+            { sort: { score: -1 }, limit: 1, projection: { score: 1, date: 1, playCount: 1 } }
         );
         if (!myRecords || myRecords.length === 0) {
-            return { ok: true, myBest: 0, myRank: 0 };
+            return { ok: true, myBest: 0, myRank: 0, myPlayCount: 0 };
         }
         const myBest = myRecords[0].score;
+        // 游玩次数：经典模式从字段取，无限/限时用 count 查记录数
+        let myPlayCount = 0;
+        if (isClassic) {
+            myPlayCount = myRecords[0].playCount || 1;
+        } else {
+            const countRes = await coll.count({ mode: mode, _openid: openid });
+            myPlayCount = countRes.result || 0;
+        }
 
         // 查比自己高的不同用户
         const { result: higherRecords } = await coll.find(
@@ -136,7 +152,7 @@ module.exports = async (ctx) => {
             higherOpenids.add(r._openid);
         }
         const myRank = higherOpenids.size + 1;
-        return { ok: true, myBest: myBest, myRank: myRank };
+        return { ok: true, myBest: myBest, myRank: myRank, myPlayCount: myPlayCount };
     }
 
     return { ok: false, errMsg: `unknown op: ${op}` };
